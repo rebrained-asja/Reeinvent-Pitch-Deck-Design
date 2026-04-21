@@ -15,7 +15,8 @@ You are the custodian of a premium brand system that Reeinvent employees will us
 | `DESIGN.md` | **law** | The abstract brand guideline. No content, no tagline copy - only rules. Every edit is a brand decision. |
 | `reference.md` | pattern library | Catalog of how the brand has been applied in production decks. Supplements DESIGN.md; must never contradict it. |
 | `assets/logo/*.svg` | immutable | The **four canonical SVGs** - the only brand graphics permitted anywhere in this project. |
-| `pitch-deck.html` | demo | The test pitch deck exercising the system. Regenerate when validating new rules. |
+
+No demo/test decks ship with this repo. When a deck is built (for validation, for the client, for a new offer), it lives in the working directory and is not committed back to this repo. The repo itself is the brand system, not the examples.
 
 ## Directory map
 
@@ -23,8 +24,8 @@ You are the custodian of a premium brand system that Reeinvent employees will us
 /Users/rebrained/Documents/Projects/Reeinvent/
 ├── CLAUDE.md                 ← this file
 ├── DESIGN.md                 ← the brand law
+├── README.md                 ← client-facing install and usage guide
 ├── reference.md              ← pattern library from production decks
-├── pitch-deck.html           ← demo deck (11 slides, 16:9)
 └── assets/
     └── logo/                 ← the four canonical SVGs - nothing else
         ├── Arrow-Up.svg                                        ← background watermark arrow (native fill #F5F5F5)
@@ -180,7 +181,7 @@ Claude makes these mistakes by default. Pre-empt them.
 2. Draft the new or modified rule in plain language and propose to the user.
 3. Confirm.
 4. Edit DESIGN.md.
-5. Update `pitch-deck.html` to comply.
+5. Update the current working deck (whatever HTML / PPTX file is live in the working directory) to comply.
 
 ### "Add a new component"
 1. Do not skip straight to code.
@@ -197,7 +198,7 @@ Claude makes these mistakes by default. Pre-empt them.
 5. Invoke **`normalize`** to verify the fix didn't introduce a new violation elsewhere.
 
 ### "Export / convert to PPTX or PDF"
-- HTML demos have `@media print` rules in `pitch-deck.html` - use browser print-to-PDF.
+- HTML decks should include `@media print` rules (flatten slides to full-page layout) so browser print-to-PDF produces a clean deck.
 - For real `.pptx` output, invoke the **`anthropic-skills:pptx`** skill.
 - For PDF reads/exports, invoke the **`anthropic-skills:pdf`** skill.
 - DESIGN.md §12 documents the export settings presenters follow.
@@ -224,7 +225,7 @@ Six specialized skills are installed. When a request matches one of these trigge
 
 ### `critique` - UX / visual design review
 **Trigger**: structured design feedback. Use when the user sends a screenshot, says something looks "off," or asks "what's wrong here?".
-**Invoke when the user says**: "review this slide", "this looks wrong", "what's off about this?", or sends a screenshot of pitch-deck.html asking for feedback. **Run `critique` before `polish`** when both could apply - critique identifies problems, polish fixes finish details.
+**Invoke when the user says**: "review this slide", "this looks wrong", "what's off about this?", or sends a screenshot of a working deck asking for feedback. **Run `critique` before `polish`** when both could apply - critique identifies problems, polish fixes finish details.
 
 ### `audit` - technical quality check
 **Trigger**: accessibility, responsive behavior, and anti-pattern checks before a deck is exported to PDF or sent externally.

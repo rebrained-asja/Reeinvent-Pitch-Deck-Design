@@ -71,7 +71,6 @@ Claude knows the full brand system automatically: the 9 canonical colors, the 30
 - **DESIGN.md** - The complete brand guideline. Every rule Claude follows. You can read it if you want to understand the system in detail, but you don't have to.
 - **CLAUDE.md** - The operating manual for Claude. Automatically loaded when you open Claude from this folder. You don't need to read it.
 - **reference.md** - Slide archetypes distilled from real Reeinvent presentations. Useful when you want Claude to copy a specific layout pattern.
-- **signal-deck.html** - A complete example pitch deck. Open it in any browser to see the brand system in action.
 - **assets/logo/** - The four brand graphics (two wordmark versions, two arrow variants). Claude uses these automatically.
 
 ---
