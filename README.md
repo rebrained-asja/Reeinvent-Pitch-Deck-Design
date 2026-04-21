@@ -85,13 +85,13 @@ No. As long as you start Claude from inside this folder, the brand rules load au
 Only when Claude is running from this folder (or a project folder that copies these files in). Claude reads the rules from `CLAUDE.md` when it starts.
 
 **What if something looks off in the output?**
-Send the screenshot to your Reeinvent contact. Every rendering edge case is considered a bug in the system, not a copy issue.
+Send the screenshot to your Rebrained contact. Every rendering edge case is considered a bug in the system, not a copy issue.
 
 **Can I edit the brand rules?**
-The files are yours to modify, but changing `DESIGN.md` or `CLAUDE.md` will change what Claude produces. Coordinate with your Reeinvent contact before making rule changes.
+The files are yours to modify, but changing `DESIGN.md` or `CLAUDE.md` will change what Claude produces. Coordinate with your Rebrained contact before making rule changes.
 
 ---
 
 ## Support
 
-Questions, bug reports, or requests for new slide patterns: contact your Reeinvent account lead.
+Questions, bug reports, or requests for new slide patterns: contact your Rebrained account lead.
