@@ -489,10 +489,25 @@ Decks look better when they don't animate - but when motion is used, it must be 
 
 ## 12. Export & Format Tips
 
-### PowerPoint (.pptx)
+### PowerPoint (.pptx) - customizability requirements (strict)
+
+Every PPTX deck Claude generates must be **fully editable by the presenter in PowerPoint / Keynote / Google Slides.** A flattened, image-only deck fails this rule. The presenter must be able to change text, move shapes, re-skin colors, and add new slides from the existing layouts without recreating anything from scratch.
+
+1. **Live editable text.** Every text element is a native PowerPoint text frame (`TextFrame` in python-pptx). Never rasterized, never converted to shapes or paths, never embedded as an image.
+2. **Native shapes.** Cards, pills, cover backgrounds, gradient fills, stripe accents, underlines, callout bubbles are PowerPoint shape objects (`Slide.shapes.add_shape()`, `.add_textbox()`, etc.), not flattened images.
+3. **SVG assets as picture objects.** The four canonical SVGs go in via `Slide.shapes.add_picture()` so the presenter can reposition or resize them. Alt text is always set (`picture.alt_text = "Reeinvent arrow"` etc.) for accessibility and easy Selection Pane navigation.
+4. **Theme Colors defined.** The 9 canonical hex codes are registered as PPTX Theme Colors in the `theme1.xml` of the .pptx package. Shape fills reference Theme Color slots (for example `MSO_THEME_COLOR.ACCENT_1` mapped to Core Blue) rather than hard-coding RGB on every shape. This lets a global palette change propagate.
+5. **Theme Font set to Roboto** with Arial as fallback. Set via the theme's Major Font + Minor Font definitions.
+6. **Slide Master + Layouts per archetype.** The Slide Master defines the wordmark stamp, footer page number, and default typography. One Slide Layout exists per production archetype (cover, section divider, service detail, stat, contact, closing, agenda, etc. per `reference.md`). When the presenter adds a new slide from the "New Slide" menu, each layout is available as a brand-correct starting point.
+7. **Fonts embedded.** Save with `embed_font=True` (or the PowerPoint equivalent) so the deck renders correctly on machines without Roboto installed.
+8. **Group related elements.** When a title, its gradient stripe, and its eyebrow should move as a unit, group them (`Slide.shapes.add_group_shape()`). The presenter moves one block, not three pieces.
+9. **Charts as native charts, not screenshots.** Any stat visualization, bar chart, line chart is a native PPTX chart object the presenter can edit. Not a flattened image.
+
+**Check before handing off:** open the generated .pptx in PowerPoint, click on any text element, and verify it enters edit mode. Click on any background rectangle and verify it can be moved. If any element is locked as an image, the deck violates this rule and must be regenerated.
+
+### PowerPoint (.pptx) - presenter setup (for context)
 - **File → Options → Save → Embed fonts** → check "Embed fonts in the file" and "Embed all characters". Ensures Roboto travels with the deck.
 - Slide size: **Design → Slide Size → Widescreen (16:9)** - then **Custom → 13.333 in × 7.5 in** if needed.
-- Colors: set the **Theme Colors** to the 12 brand colors from §2 so theme-aware shapes auto-adopt the palette.
 - Gradients: Format Shape → Fill → Gradient Fill → Type: **Linear**, Angle: **30°**, two stops at 0% `#2665E2` and 100% `#C26DE6`.
 
 ### Google Slides

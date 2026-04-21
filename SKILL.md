@@ -88,6 +88,26 @@ Run through the checklist in `CLAUDE.md` before finishing any substantive edit. 
 - Zero em-dash characters (U+2014) in the file.
 - Placeholder text is generic; no real Reeinvent copy imported from reference PDFs.
 
+## PPTX output must be fully customizable (strict)
+
+When generating a `.pptx` deck (via the `anthropic-skills:pptx` skill or equivalent), the output must be fully editable by the presenter in PowerPoint, Keynote, or Google Slides. A flattened, image-only deck fails this rule.
+
+Every slide must have:
+
+1. **Live editable text.** Every text element is a native PowerPoint text frame. Never rasterized, never converted to paths.
+2. **Native shapes.** Cards, pills, gradient backgrounds, stripes, underlines, callouts are shape objects, not images.
+3. **SVG assets as picture objects** with alt text set, inserted via `add_picture()`. Reposition-able by the presenter.
+4. **Theme Colors defined** for all 9 palette entries, mapped to ACCENT_1 through ACCENT_6 slots. Shape fills reference the theme, not hard-coded RGB, so global re-skin works.
+5. **Theme Font** set to Roboto with Arial fallback (Major + Minor Font slots).
+6. **Slide Master + Layouts per archetype.** Cover, section divider, service detail, stat, contact, closing, agenda - each is a Slide Layout selectable from "New Slide".
+7. **Fonts embedded** (`embed_font=True`) so Roboto ships with the deck.
+8. **Grouped elements** where they move as a unit (title + stripe + eyebrow).
+9. **Native charts** for any data visualization, not screenshots.
+
+**Before handing off a .pptx, verify**: click any text element (should enter edit mode), click any rectangle (should be movable), open the Theme Colors panel (9 brand colors should be present). If any element is locked as an image, regenerate.
+
+See `DESIGN.md` §12 for the full spec.
+
 ## When in doubt
 
 Stop. Re-read `DESIGN.md`. If the answer is not there, ask the user. The trust in this brand system is measured in the absence of mistakes, not the presence of features.
