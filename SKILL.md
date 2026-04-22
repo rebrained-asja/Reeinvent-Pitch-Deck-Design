@@ -14,6 +14,18 @@ You are the custodian of the Reeinvent brand system when this skill is active. E
 - The user asks to refactor, polish, or normalize a Reeinvent-branded surface.
 - The user mentions `DESIGN.md`, `CLAUDE.md`, the Reeinvent brand, or a slide archetype (A1 cover, A2 divider, A5 service detail, etc.).
 
+## Before first steps: check for brand-system updates
+
+Before reading the ground-truth files, verify the installed skill is current. Run this check once per session.
+
+1. Read the local `VERSION` file at the skill root.
+2. Fetch the latest from `https://raw.githubusercontent.com/rebrained-asja/Reeinvent-Pitch-Deck-Design/main/VERSION`.
+3. Compare trimmed strings.
+4. **If they differ**, tell the user: *"Reeinvent brand system is outdated (local vX.Y.Z, latest vA.B.C). Pull or reinstall before continuing."* Wait for the user's decision - do not continue applying rules that may have been superseded.
+5. **If the fetch fails** (offline, GitHub unreachable, repo private), note the failure in one line and proceed.
+
+Bump discipline for `VERSION` is documented in `CLAUDE.md` → "Session start: check for brand-system updates."
+
 ## First steps in any session where this skill applies
 
 1. Read `DESIGN.md` - the complete brand law.
@@ -33,13 +45,21 @@ Always at **30 degrees**. Never 45, 135, or any cardinal direction. Three canoni
 ### Typography
 **Roboto only**, weights 300 / 400 / 500 / 700 / 900. No other fonts, no other weights. Never Calibri, never Times, never Arial as primary.
 
-### Assets (four SVGs, nothing else)
-- `assets/logo/Arrow-Up.svg` - background watermark, always flush top-right at `top: 0; right: 0;`, fully visible, never cropped.
-- `assets/logo/Upwards Arrow.svg` - bullet marker for lists, always used, never substituted.
-- `assets/logo/Reeinvent - Almost Black Wordmark (Recreation).svg` - the **white** wordmark (filename is historical). Use on dark or gradient surfaces.
-- `assets/logo/Reeinvent - Blue Wordmark (Recreation).svg` - the **gradient** wordmark (filename is historical). Use on light surfaces.
+### Assets (four brand marks, SVG + PNG per mark)
 
-Never inline SVG paths, never create new SVGs, never draw icons in CSS, never use an external icon library.
+Each canonical brand mark ships as an SVG (for HTML / web) and a PNG at 2x (for PPTX / Slides embedding).
+
+- `assets/logo/Arrow-Up.svg` / `Arrow-Up@2x.png` - background watermark, always flush top-right at `top: 0; right: 0;`, fully visible, never cropped.
+- `assets/logo/Upwards-Arrow.svg` / `Upwards-Arrow@2x.png` - bullet marker for lists, always used, never substituted.
+- `assets/logo/White-Logo.svg` / `White-Logo@2x.png` - white wordmark, use on dark or gradient surfaces.
+- `assets/logo/Gradient-Logo.svg` / `Gradient-Logo@2x.png` - gradient wordmark, use on light surfaces.
+
+**Routing by output format:**
+- HTML / web surfaces → use the `.svg` file.
+- PPTX / Google Slides → use the `@2x.png` file, inserted via `Slide.shapes.add_picture()`. PPTX renders SVG imports unreliably.
+- PDF via HTML print → SVG. PDF via PPTX export → PNG.
+
+Never inline SVG paths, never create new marks, never draw icons in CSS, never use an external icon library, never substitute SVG for PNG or vice versa outside the routing rule.
 
 ### Text
 - No em-dash character (Unicode U+2014) in any text surface.
@@ -67,6 +87,7 @@ Never inline SVG paths, never create new SVGs, never draw icons in CSS, never us
 - **Fix classes of failure, not instances.** When a rendering bug surfaces, propose a safety contract and a pre-flight check alongside the fix, so the failure mode cannot recur.
 - **Cite rules when invoking them.** Reference the DESIGN.md section and rule number (for example, "per §8 rule 4") so the user can verify.
 - **Responses are tight.** No adjective inflation, no "beautiful / stunning / sleek," no victory laps. State what changed and why in one or two sentences. Bullet lists welcome when they compress information.
+- **When blocked mid-task, stop and surface.** Tool failure, permission denied, missing input, or an output contract that can't be met: halt, report the block in one sentence, list alternatives ranked by brand fidelity, wait for the user to pick. Never silently switch engines, substitute formats, rasterize, or simplify. See `CLAUDE.md` → "When blocked mid-task."
 
 ## Pre-flight before saying "done"
 
@@ -82,7 +103,7 @@ Run through the checklist in `CLAUDE.md` before finishing any substantive edit. 
 - Text under 40pt on dark surfaces is white, not gradient.
 - Gradient stripes match text width.
 - Button content is center-aligned.
-- Bullet lists use `Upwards Arrow.svg` and each item fits on one line.
+- Bullet lists use `Upwards-Arrow.svg` (HTML) or `Upwards-Arrow@2x.png` (PPTX), and each item fits on one line.
 - Sparse slides anchor content to the bottom.
 - Every `background-clip: text` element satisfies the safety contract.
 - Zero em-dash characters (U+2014) in the file.
@@ -90,7 +111,7 @@ Run through the checklist in `CLAUDE.md` before finishing any substantive edit. 
 
 ## PPTX output must be fully customizable (strict)
 
-When generating a `.pptx` deck (via the `anthropic-skills:pptx` skill or equivalent), the output must be fully editable by the presenter in PowerPoint, Keynote, or Google Slides. A flattened, image-only deck fails this rule.
+When generating a `.pptx` deck, use the `anthropic-skills:pptx` skill (which wraps python-pptx). Never use PowerPoint automation (AppleScript, osascript, the PowerPoint app's scripting interface), Keynote scripting, or macro-based generation. The output must be fully editable by the presenter in PowerPoint, Keynote, or Google Slides. A flattened, image-only deck fails this rule.
 
 Every slide must have:
 
@@ -103,6 +124,7 @@ Every slide must have:
 7. **Fonts embedded** (`embed_font=True`) so Roboto ships with the deck.
 8. **Grouped elements** where they move as a unit (title + stripe + eyebrow).
 9. **Native charts** for any data visualization, not screenshots.
+10. **If any brand element cannot be rendered natively, stop - do not substitute.** Halt and report: which element failed, why native rendering failed, what alternatives exist. Never rasterize, flatten, omit, simplify "because it's close enough," or switch engines. Wait for the user to pick.
 
 **Before handing off a .pptx, verify**: click any text element (should enter edit mode), click any rectangle (should be movable), open the Theme Colors panel (9 brand colors should be present). If any element is locked as an image, regenerate.
 

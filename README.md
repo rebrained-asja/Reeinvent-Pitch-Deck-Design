@@ -1,54 +1,80 @@
 # Reeinvent Pitch Deck Design System
 
-Your AI-assisted brand kit for building Reeinvent-style presentations. Every slide Claude helps you build will automatically follow the Reeinvent brand rules: colors, typography, logo placement, gradient usage, and layout.
+Your AI-assisted brand kit for building Reeinvent-style presentations. Once installed, every slide Claude helps you build will automatically follow the Reeinvent brand rules: colors, typography, logo placement, gradient usage, and layout.
 
 ---
 
 ## What you need
 
-1. **Claude Code** installed on your computer. Download from [claude.ai/download](https://claude.ai/download) if you don't have it yet.
-2. This folder (downloaded or cloned, see below).
+- **Claude Code**, **Claude Desktop**, or **Cowork** - any version that supports plugins (v2.0+).
+- A logged-in Anthropic account.
 
-That's it. No other tools required.
+That's it. No additional tools, no git required for the simple install.
 
 ---
 
-## How to install
+## Install (recommended - two commands)
 
-### Option 1 - Download the ZIP (easiest, no tools needed)
+Works identically in **Claude Code**, **Claude Desktop**, and **Cowork**. Open any of those three, then paste:
 
-1. Go to the [repository page](https://github.com/rebrained-asja/Reeinvent-Pitch-Deck-Design) on GitHub.
-2. Click the green **Code** button on the top right.
-3. Click **Download ZIP**.
-4. Unzip the folder somewhere you'll remember, for example `~/Documents/Reeinvent-Brand`.
+```
+/plugin marketplace add rebrained-asja/Reeinvent-Pitch-Deck-Design
+```
 
-### Option 2 - Clone with Git (if you have Git installed)
+Then install the plugin:
+
+```
+/plugin install reeinvent-pitch-deck-design@reeinvent-brand-system
+```
+
+That's it. The brand system is now active whenever Claude is working on a Reeinvent surface.
+
+### Verify the install
+
+Ask Claude:
+
+> "What brand system is active, and what version?"
+
+Claude should confirm it's running the Reeinvent Pitch Deck Design plugin and report a version matching the current `VERSION` file on GitHub. If it says "outdated" or "not found," re-run the install.
+
+---
+
+## Install (fallback - manual download)
+
+For offline installs or environments where the plugin marketplace is unavailable.
+
+### Option A - Download the ZIP
+
+1. Go to the [repository page](https://github.com/rebrained-asja/Reeinvent-Pitch-Deck-Design).
+2. Click the green **Code** button on the top right, then **Download ZIP**.
+3. Unzip the folder somewhere you'll remember, for example `~/Documents/Reeinvent-Brand`.
+
+### Option B - Clone with Git
 
 ```bash
 git clone https://github.com/rebrained-asja/Reeinvent-Pitch-Deck-Design.git
 ```
 
----
+### Using the fallback install
 
-## How to use it with Claude
-
-1. Open your terminal (Mac: Terminal app / Windows: PowerShell).
+1. Open your terminal (Mac: Terminal / Windows: PowerShell).
 2. Go into the folder you just downloaded:
    ```bash
    cd ~/Documents/Reeinvent-Brand
    ```
-   (adjust the path to wherever you unzipped it)
-3. Start Claude:
+3. Start Claude Code:
    ```bash
    claude
    ```
-4. Ask Claude anything about your presentation. Claude will automatically load the brand system from this folder and follow every rule.
+4. Claude will automatically load the brand system from this folder and follow every rule.
 
 ---
 
-## Example prompts to try
+## How to use it with Claude
 
-Here are some things you can ask Claude once you're inside this folder:
+Once installed (either path), just talk to Claude. The brand rules load automatically.
+
+### Example prompts to try
 
 > **"Build me a 10-slide pitch deck for [your topic]. Follow our brand system."**
 
@@ -62,26 +88,44 @@ Here are some things you can ask Claude once you're inside this folder:
 
 > **"Show me the four slide archetypes I can use for a sales deck."**
 
-Claude knows the full brand system automatically: the 9 canonical colors, the 30-degree gradient, Roboto typography, the four logo assets, the slide archetypes (cover, section divider, service detail, success story, stat, contact, closing), and every layout rule.
+Claude knows the full brand system automatically: the 9 canonical colors, the 30-degree gradient, Roboto typography, the four brand marks (each with SVG for HTML and PNG for PPTX), the slide archetypes (cover, section divider, service detail, success story, stat, contact, closing), and every layout rule.
 
 ---
 
-## What's inside this folder
+## What's inside the plugin
 
-- **DESIGN.md** - The complete brand guideline. Every rule Claude follows. You can read it if you want to understand the system in detail, but you don't have to.
-- **CLAUDE.md** - The operating manual for Claude. Automatically loaded when you open Claude from this folder. You don't need to read it.
-- **reference.md** - Slide archetypes distilled from real Reeinvent presentations. Useful when you want Claude to copy a specific layout pattern.
-- **assets/logo/** - The four brand graphics (two wordmark versions, two arrow variants). Claude uses these automatically.
+- **DESIGN.md** - The complete brand guideline. Every rule Claude follows.
+- **CLAUDE.md** - The operating manual for Claude. Loaded automatically.
+- **SKILL.md** - Skill manifest (invoked automatically when you work on a Reeinvent surface).
+- **reference.md** - Slide archetypes distilled from real Reeinvent presentations.
+- **VERSION** - Semver of the currently installed brand system.
+- **assets/logo/** - The four brand marks, each as SVG (for HTML / web) and PNG at 2x (for PPTX / Slides embedding).
+
+---
+
+## Updating to a new version
+
+### Plugin install
+
+```
+/plugin update reeinvent-pitch-deck-design@reeinvent-brand-system
+```
+
+### Manual install
+
+Re-download the ZIP, or `git pull` inside the cloned folder.
+
+Claude will warn you at session start if your local copy is behind the GitHub version.
 
 ---
 
 ## Common questions
 
 **Do I need to tell Claude about the brand every time?**
-No. As long as you start Claude from inside this folder, the brand rules load automatically.
+No. Once installed, the brand rules apply whenever Claude is working on a Reeinvent surface.
 
 **Can I use this in any folder?**
-Only when Claude is running from this folder (or a project folder that copies these files in). Claude reads the rules from `CLAUDE.md` when it starts.
+With the plugin install - yes, the brand system activates anywhere Claude detects a Reeinvent surface. With the manual install - only when Claude is running from the folder you downloaded.
 
 **What if something looks off in the output?**
 Send the screenshot to your Rebrained contact. Every rendering edge case is considered a bug in the system, not a copy issue.

@@ -8,7 +8,7 @@ These patterns appear on most slides and should be treated as the deck's connect
 
 ### Brand stamp (top-right corner)
 - **Every content slide** carries the Reeinvent wordmark in the **top-right corner**, at ~0.5 in height.
-- On light strips: Blue Wordmark. On dark areas: white recolor.
+- On light strips: Gradient Wordmark. On dark areas: White Wordmark.
 - Position: anchored `~0.4 in from right, ~0.4 in from top`.
 - Never moves to another corner. This is the silent signature on every page.
 

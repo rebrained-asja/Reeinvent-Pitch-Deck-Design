@@ -192,10 +192,8 @@ Opacity stays within:
 
 Only **two wordmark variants** exist. There is no lettermark, no app-icon mark, no monogram.
 
-- **Gradient Wordmark** - `assets/logo/Reeinvent - Blue Wordmark (Recreation).svg`. Internally carries the Signature Gradient (30°, `#2665E2 → #C26DE6`). The default mark on all light surfaces (Off-White, white cards, white strips).
-- **White Wordmark** - `assets/logo/Reeinvent - Almost Black Wordmark (Recreation).svg`. Internally `fill: #ffffff`. The default mark on all dark/gradient surfaces (Ink, Deep Navy, Signature-Gradient backgrounds).
-
-> **File-name note.** Both filenames are historical. Do not let "Almost Black" confuse you: the SVG is pure white. Do not let "Blue" confuse you: the SVG is the full blue-to-violet gradient. Always verify by role (gradient vs white), not filename.
+- **Gradient Wordmark** - `assets/logo/Gradient-Logo.svg` (HTML) / `assets/logo/Gradient-Logo@2x.png` (PPTX). Carries the Signature Gradient (30°, `#2665E2 → #C26DE6`). The default mark on all light surfaces (Off-White, white cards, white strips).
+- **White Wordmark** - `assets/logo/White-Logo.svg` (HTML) / `assets/logo/White-Logo@2x.png` (PPTX). Solid `#ffffff`. The default mark on all dark / gradient surfaces (Ink, Deep Navy, Signature-Gradient backgrounds).
 
 ### Placement on slides
 - **Cover slide (Signature Gradient bg)**: White Wordmark, centered horizontally, anchored at vertical center (slight optical lift of −0.3 in). Height ~0.9 in.
@@ -226,7 +224,7 @@ All templates target **16:9, 13.333 in × 7.5 in**. Google Slides (10 in × 5.62
 - **Title**: Mega title, 80 pt, white, weight 700. Left-aligned, anchored at `0.8 in from left, vertical center − 0.5 in`. Max width **9 in**.
   - Use **one Gradient Highlight** on one or two key words.
 - **Sub-headline**: 24 pt, Off-White at 78% opacity, directly under title with 32 pt gap. Max width **8 in**.
-- **Logo**: Blue Wordmark (white recolor) at **0.8 in height**, bottom-left, **0.5 in from left, 0.5 in from bottom**.
+- **Logo**: White Wordmark at **0.8 in height**, bottom-left, **0.5 in from left, 0.5 in from bottom**.
 - **Date/author**: 12 pt Off-White at 55% opacity, bottom-right, **0.5 in from right, 0.5 in from bottom**.
 
 ### 6.2 Section Divider
@@ -243,7 +241,7 @@ All templates target **16:9, 13.333 in × 7.5 in**. Google Slides (10 in × 5.62
 - **Title**: 54 pt Ink, weight 700, left-aligned, starting at `0.6 in from left, 1.2 in from top`. Max width **11 in**.
 - **Body**: 20 pt Ink, 1.35 line height. Starts 32 pt below title. Max width **9 in**.
 - **Small arrow accent** (optional): 0.35 in inline arrow in Core Blue, replacing bullet markers.
-- **Footer**: Blue Wordmark 0.3 in height bottom-left; page number bottom-right.
+- **Footer**: Gradient Wordmark 0.3 in height bottom-left; page number bottom-right.
 
 ### 6.4 Content Slide - Two Column (50/50 split)
 - **Background**: Off-White.
@@ -287,7 +285,7 @@ All templates target **16:9, 13.333 in × 7.5 in**. Google Slides (10 in × 5.62
 - **Display arrow**: 6.0 in, centered at `2.5 in from top`, fill White.
 - **Mega message**: 64 pt, white, 700, centered, under arrow.
 - **CTA**: rounded-pill button (see §7), solid white fill with Ink text, 40 pt gap below message.
-- **Logo**: Blue Wordmark (white recolor) at 0.8 in height, bottom-center, 0.5 in from bottom.
+- **Logo**: White Wordmark at 0.8 in height, bottom-center, 0.5 in from bottom.
 
 ### 6.9 Agenda / Table of Contents
 - **Background**: Off-White.
@@ -322,14 +320,14 @@ There is **no SVG button library**. When a CTA is required, build it from brand 
 3. **Reserved for cover, closing, and service-detail slides.** CTAs do not appear on content, stat, quote, section-divider, or data slides.
 4. **No hover or motion states in static decks.** Hover styling is an HTML-demo affordance only. Exported PPTX/PDF slides render one fixed state.
 5. **No custom colors.** CTAs use one of the three documented fills. Do not introduce orange, green, or any non-brand hue.
-6. **The bullet marker (`Upwards Arrow.svg`) is decoration, not a button.** See Bullet List component. Bullets are never clickable, never links, never carry hover states.
+6. **The bullet marker (`Upwards-Arrow`) is decoration, not a button.** See Bullet List component. Bullets are never clickable, never links, never carry hover states.
 7. **Button content is always center-aligned horizontally within the button.** Label and optional Arrow form a single content block, centered. Button width is intrinsic - it hugs the content plus symmetric padding. The label is never pinned left with the arrow pushed right, and there is never asymmetric padding on either side.
 
 ### Bullet List
 
 Bulleted lists use a single canonical marker and obey a strict set of rules. Sloppy bullets - wrapped text, inconsistent cadence, substitute markers - are a brand violation.
 
-**Marker**: always `assets/logo/Upwards Arrow.svg`. A Core Blue circle containing the up-right arrow. No dots, no dashes, no checkmarks, no CSS-drawn rounded-squares, no pseudo-elements.
+**Marker**: always `assets/logo/Upwards-Arrow.svg` (HTML) / `assets/logo/Upwards-Arrow@2x.png` (PPTX). A Core Blue rounded square containing the up-right arrow. No dots, no dashes, no checkmarks, no CSS-drawn rounded-squares, no pseudo-elements.
 
 **Size**: marker height ≈ **1.6 × the label's cap-height** (so the bullet reads a hair larger than the text and visually anchors the row).
 
@@ -339,7 +337,7 @@ Bulleted lists use a single canonical marker and obey a strict set of rules. Slo
 
 #### Bullet list rules (strict)
 
-1. **One marker, always.** `Upwards Arrow.svg` is the only bullet permitted in the Reeinvent system. No other marker - ever.
+1. **One marker, always.** `Upwards-Arrow` is the only bullet permitted in the Reeinvent system. No other marker - ever.
 2. **One line per item - always.** No bullet text may wrap to a second line. Enforce with `white-space: nowrap` in HTML/CSS, or by keeping copy short in PPTX.
 3. **Copy as tight as possible.** Bullets are scan-ready summaries, not sentences. If an item genuinely needs two lines, split it into two bullets or move the content out of the list into body copy.
 4. **Consistent grammatical cadence.** Every item in a given list follows the same shape - all noun phrases ("24/7 drift monitoring"), or all verb phrases ("Monitor drift"), or all adjective-led phrases ("Fast · Robust · Scalable"). Never mix shapes inside one list.
@@ -493,15 +491,21 @@ Decks look better when they don't animate - but when motion is used, it must be 
 
 Every PPTX deck Claude generates must be **fully editable by the presenter in PowerPoint / Keynote / Google Slides.** A flattened, image-only deck fails this rule. The presenter must be able to change text, move shapes, re-skin colors, and add new slides from the existing layouts without recreating anything from scratch.
 
+**Generation engine: python-pptx only.** Never use PowerPoint automation (AppleScript, osascript, the PowerPoint app's scripting interface), Keynote scripting, or macro-based generation. The Anthropic `pptx` skill (which wraps python-pptx) is the preferred path - invoke it via the Skill tool rather than writing raw python-pptx code from scratch. If python-pptx cannot produce the required output, apply rule 10 below (halt and report) instead of switching engines.
+
 1. **Live editable text.** Every text element is a native PowerPoint text frame (`TextFrame` in python-pptx). Never rasterized, never converted to shapes or paths, never embedded as an image.
 2. **Native shapes.** Cards, pills, cover backgrounds, gradient fills, stripe accents, underlines, callout bubbles are PowerPoint shape objects (`Slide.shapes.add_shape()`, `.add_textbox()`, etc.), not flattened images.
-3. **SVG assets as picture objects.** The four canonical SVGs go in via `Slide.shapes.add_picture()` so the presenter can reposition or resize them. Alt text is always set (`picture.alt_text = "Reeinvent arrow"` etc.) for accessibility and easy Selection Pane navigation.
+3. **Brand assets as picture objects - PNG, not SVG.** The four canonical brand marks go in via `Slide.shapes.add_picture()` using the `@2x.png` variant from `assets/logo/`, never the SVG. PPTX and Google Slides render SVG imports unreliably (gradient collapse, placeholder rectangles, missing fills); PNG is universally reliable. The presenter can still reposition or resize the picture object. Alt text is always set (`picture.alt_text = "Reeinvent arrow"` etc.) for accessibility and Selection Pane navigation. See §14 for the routing rule.
 4. **Theme Colors defined.** The 9 canonical hex codes are registered as PPTX Theme Colors in the `theme1.xml` of the .pptx package. Shape fills reference Theme Color slots (for example `MSO_THEME_COLOR.ACCENT_1` mapped to Core Blue) rather than hard-coding RGB on every shape. This lets a global palette change propagate.
 5. **Theme Font set to Roboto** with Arial as fallback. Set via the theme's Major Font + Minor Font definitions.
 6. **Slide Master + Layouts per archetype.** The Slide Master defines the wordmark stamp, footer page number, and default typography. One Slide Layout exists per production archetype (cover, section divider, service detail, stat, contact, closing, agenda, etc. per `reference.md`). When the presenter adds a new slide from the "New Slide" menu, each layout is available as a brand-correct starting point.
 7. **Fonts embedded.** Save with `embed_font=True` (or the PowerPoint equivalent) so the deck renders correctly on machines without Roboto installed.
 8. **Group related elements.** When a title, its gradient stripe, and its eyebrow should move as a unit, group them (`Slide.shapes.add_group_shape()`). The presenter moves one block, not three pieces.
 9. **Charts as native charts, not screenshots.** Any stat visualization, bar chart, line chart is a native PPTX chart object the presenter can edit. Not a flattened image.
+10. **If any brand element cannot be rendered natively, stop - do not substitute.**
+    - **Native rendering** = live text frames, native shape objects, native charts, SVG assets inserted via `Slide.shapes.add_picture()`. Everything in rules 1–9 above.
+    - **Prohibited fallbacks** (without explicit user approval): rasterizing text or shapes to PNG/JPG, embedding flattened images of otherwise-native elements, removing the element, simplifying the styling (e.g., replacing gradient text with solid color "because it's close enough"), or switching to a different generation engine.
+    - **Required action on failure:** halt generation. Report to the user - (a) which element failed, (b) why native rendering failed, (c) available alternatives ranked by brand fidelity. Wait for a decision before continuing.
 
 **Check before handing off:** open the generated .pptx in PowerPoint, click on any text element, and verify it enters edit mode. Click on any background rectangle and verify it can be moved. If any element is locked as an image, the deck violates this rule and must be regenerated.
 
@@ -535,13 +539,13 @@ When asking an AI agent to generate a slide, include:
 **Canvas**: `16:9, 13.333 in × 7.5 in, Off-White background (#F5F5F5)`
 **Fonts**: `Roboto 700 for title, Roboto 400 for body`
 **Palette**: `Ink #0A1220, Core Blue #2665E2, Mid Violet #C26DE6, 30° gradient`
-**Arrow**: `use assets/logo/Arrow-Up.svg at [size] in, fill [color], rotation [deg]`
-**Logo**: `Blue Wordmark at 0.3 in height, bottom-left (0.5, 7.15 in)`
+**Arrow**: `use Arrow-Up mark (SVG for HTML, @2x.png for PPTX) at [size] in, fill [color], rotation [deg]`
+**Logo**: `Gradient Wordmark at 0.3 in height, bottom-left (0.5, 7.15 in)`
 **Margins**: `content starts 0.6 in from left/top, safe area 0.5 in`
 
 ### Example prompts
 
-> "Build a **cover slide** on Ink background. Arrow at 6 in in top-right bleeding off-canvas, fill Off-White at 8% opacity, rotation 0°. Eyebrow 'AI-FIRST ENGINEERING PARTNER' at (0.8, 0.8), 14 pt, Gradient Text, uppercase, +1.5 pt tracking. Title 'From ideas to scalable AI solutions - in weeks.' at 80 pt weight 700 white, anchored bottom-left at (0.8, 4.2 in), max width 9 in, with Gradient Highlight on 'in weeks'. Blue Wordmark (white recolor) at 0.8 in height, bottom-left (0.5, 0.5 in from bottom). Date '2026-04-21' at 12 pt, 55% white, bottom-right."
+> "Build a **cover slide** on Ink background. Arrow at 6 in in top-right bleeding off-canvas, fill Off-White at 8% opacity, rotation 0°. Eyebrow 'AI-FIRST ENGINEERING PARTNER' at (0.8, 0.8), 14 pt, Gradient Text, uppercase, +1.5 pt tracking. Title 'From ideas to scalable AI solutions - in weeks.' at 80 pt weight 700 white, anchored bottom-left at (0.8, 4.2 in), max width 9 in, with Gradient Highlight on 'in weeks'. White Wordmark at 0.8 in height, bottom-left (0.5, 0.5 in from bottom). Date '2026-04-21' at 12 pt, 55% white, bottom-right."
 
 > "Build a **section divider** on full-bleed Signature Gradient. 'SECTION 02 / 05' eyebrow top-left, 14 pt white uppercase. 'How we ship in weeks' title 72 pt weight 700 white, left-aligned, vertically centered, max width 7 in. Large Arrow at 3 in, right-center of slide, fill white, rotation 0°."
 
@@ -554,25 +558,33 @@ When asking an AI agent to generate a slide, include:
 2. Is the Arrow **not horizontally flipped**? (Only 0/90/180/270 rotations.)
 3. Is every text size **≥ 14 pt**?
 4. Is there **one idea, one title, one CTA** per slide?
-5. Does the footer have the Blue Wordmark + page number?
+5. Does the footer have the Gradient Wordmark + page number?
 6. Is the slide using **Ink/Off-White**, not pure black/white?
 7. Is the **Signature Gradient appearing at most twice** across any three consecutive slides?
 
 ## 14. Asset Index
 
-The project ships **four SVG files and no more**. These are the only brand graphics permitted anywhere in any Reeinvent deck, layout, or surface. Do not create, import, inline, or redraw anything else.
+The project ships **four brand marks** - each provided as an SVG (for HTML / web) and a PNG at 2x (for PPTX / Slides embedding). These are the only brand graphics permitted anywhere in any Reeinvent deck, layout, or surface. Do not create, import, inline, or redraw anything else.
 
-| Asset | Path | Canonical use |
-|-------|------|---------------|
-| The Arrow | `assets/logo/Arrow-Up.svg` | The signature mark - background watermarks only. Section-divider decoration, cover / closing watermark. Square, native fill `#F5F5F5`. |
-| Gradient Wordmark | `assets/logo/Reeinvent - Blue Wordmark (Recreation).svg` | The logo on all **light** surfaces. Internally carries the Signature Gradient. (Filename is historical - the SVG is gradient-filled, not solid blue.) |
-| White Wordmark | `assets/logo/Reeinvent - Almost Black Wordmark (Recreation).svg` | The logo on all **dark / gradient** surfaces. Internally `fill: #ffffff`. (Filename is historical - the SVG is pure white, not "almost black.") |
-| Bullet Arrow | `assets/logo/Upwards Arrow.svg` | The bullet-list marker - **bullets only**. A Core Blue filled circle with an Off-White up-right arrow inside. 56 × 56 native viewBox. Never used as a watermark, decoration, or link button. |
+| Mark | SVG (HTML) | PNG (PPTX) | Canonical use |
+|------|------------|------------|---------------|
+| The Arrow | `assets/logo/Arrow-Up.svg` | `assets/logo/Arrow-Up@2x.png` | The signature mark - background watermarks only. Section-divider decoration, cover / closing watermark. Square, native fill `#F5F5F5`. |
+| Gradient Wordmark | `assets/logo/Gradient-Logo.svg` | `assets/logo/Gradient-Logo@2x.png` | The logo on all **light** surfaces. Carries the Signature Gradient. |
+| White Wordmark | `assets/logo/White-Logo.svg` | `assets/logo/White-Logo@2x.png` | The logo on all **dark / gradient** surfaces. Solid `#ffffff`. |
+| Bullet / Direction Mark | `assets/logo/Upwards-Arrow.svg` | `assets/logo/Upwards-Arrow@2x.png` | The bullet-list marker - **bullets only**. A Core Blue rounded square with a white up-right arrow inside. 56 × 56 native viewBox. Never used as a watermark, decoration, or link button. |
+
+**Asset routing by output format (strict):**
+- **HTML / web surfaces** → use the `.svg` file. Browsers render SVG natively at any size.
+- **PPTX / Google Slides** → use the `@2x.png` file, embedded via `Slide.shapes.add_picture()`. SVG import is unreliable across PowerPoint versions and Slides imports (gradients collapse to placeholder rectangles, fills drop). PNG at 2x renders identically to the vector at every realistic slide size.
+- **PDF via HTML print** → use the `.svg` file (browser handles rasterization at print time).
+- **PDF via PPTX export** → use the `@2x.png` file (PPTX is the source).
+
+Do not substitute one for the other outside this routing. Do not re-render PNGs from SVGs on the fly at runtime - the committed PNGs are the only PPTX source of truth.
 
 **Role separation (strict):**
-- `Arrow-Up.svg` → watermarks / backgrounds / cover decorations. Never a bullet.
-- `Upwards Arrow.svg` → bullet list markers. Never a watermark, never clickable, never decoration outside of lists.
-- The two Arrow SVGs are **not interchangeable**. Each has one job.
+- `Arrow-Up` → watermarks / backgrounds / cover decorations. Never a bullet.
+- `Upwards-Arrow` → bullet list markers. Never a watermark, never clickable, never decoration outside of lists.
+- The two Arrow marks are **not interchangeable**. Each has one job.
 
 **Not available, do not invent:**
 - No lettermark (REE-only symbol)
