@@ -13,9 +13,13 @@ That's it. No additional tools, no git required for the simple install.
 
 ---
 
-## Install (recommended - two commands)
+## Install (recommended)
 
-Works identically in **Claude Code**, **Claude Desktop**, and **Cowork**. Open any of those three, then paste:
+How you install depends on which Claude surface you use. All three install the same plugin - the command surface is just different.
+
+### Claude Code (terminal) and Cowork
+
+In the terminal, paste:
 
 ```
 /plugin marketplace add rebrained-asja/Reeinvent-Pitch-Deck-Design
@@ -27,7 +31,13 @@ Then install the plugin:
 /plugin install reeinvent-pitch-deck-design@reeinvent-brand-system
 ```
 
-That's it. The brand system is now active whenever Claude is working on a Reeinvent surface.
+### Claude Desktop (app)
+
+The `/plugin` slash commands do **not** work in Desktop's chat input. Install via the GUI instead:
+
+1. Open **Settings → Code → Plugins** in the Desktop app.
+2. Add the marketplace: `rebrained-asja/Reeinvent-Pitch-Deck-Design`.
+3. Install the `reeinvent-pitch-deck-design` plugin from the list.
 
 ### Verify the install
 
