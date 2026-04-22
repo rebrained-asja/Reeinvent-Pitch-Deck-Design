@@ -50,16 +50,27 @@ No demo/test decks ship with this repo. When a deck is built (for validation, fo
 ├── SKILL.md                  ← skill manifest for Claude Code / Cowork installs
 ├── VERSION                   ← semver, bumped on any brand-system edit
 ├── reference.md              ← pattern library from production decks
+├── scripts/
+│   └── embed-fonts.py        ← OOXML post-processor, embeds Roboto TTFs into generated .pptx
 └── assets/
-    └── logo/                 ← the four canonical brand marks - SVG + PNG pairs
-        ├── Arrow-Up.svg            ← background watermark arrow (native fill #F5F5F5)
-        ├── Arrow-Up@2x.png         ← PNG for PPTX embedding
-        ├── Upwards-Arrow.svg       ← BULLET marker - Core Blue rounded square + white arrow
-        ├── Upwards-Arrow@2x.png    ← PNG for PPTX embedding
-        ├── White-Logo.svg          ← WHITE wordmark (fill: #fff) for dark / gradient surfaces
-        ├── White-Logo@2x.png       ← PNG for PPTX embedding
-        ├── Gradient-Logo.svg       ← GRADIENT wordmark (#2665E2 → #C26DE6) for light surfaces
-        └── Gradient-Logo@2x.png    ← PNG for PPTX embedding
+    ├── logo/                 ← the four canonical brand marks - SVG + PNG pairs
+    │   ├── Arrow-Up.svg            ← background watermark arrow (native fill #F5F5F5)
+    │   ├── Arrow-Up@2x.png         ← PNG for PPTX embedding
+    │   ├── Upwards-Arrow.svg       ← BULLET marker - Core Blue rounded square + white arrow
+    │   ├── Upwards-Arrow@2x.png    ← PNG for PPTX embedding
+    │   ├── White-Logo.svg          ← WHITE wordmark (fill: #fff) for dark / gradient surfaces
+    │   ├── White-Logo@2x.png       ← PNG for PPTX embedding
+    │   ├── Gradient-Logo.svg       ← GRADIENT wordmark (#2665E2 → #C26DE6) for light surfaces
+    │   └── Gradient-Logo@2x.png    ← PNG for PPTX embedding
+    └── fonts/
+        └── Roboto/            ← Apache 2.0, shipped for PPTX font embedding
+            ├── Roboto-Light.ttf     ← weight 300
+            ├── Roboto-Regular.ttf   ← weight 400
+            ├── Roboto-Italic.ttf    ← weight 400 italic (pull quotes)
+            ├── Roboto-Medium.ttf    ← weight 500
+            ├── Roboto-Bold.ttf      ← weight 700
+            ├── Roboto-Black.ttf     ← weight 900
+            └── LICENSE.txt          ← Apache 2.0
 ```
 
 **Asset routing by output format:**
@@ -101,10 +112,10 @@ If you find yourself typing a hex code that is not on this list, stop. There is 
 
 **All gradients are 30° exactly.** Not 45°, not 135°, not `to bottom right`. Always `30deg` or equivalent.
 
-## Typography - one family, four weights
+## Typography - one family, five weights
 
-- Family: **Roboto** (Google Fonts, also built into Google Slides).
-- Weights: **300, 400, 700, 900**. Nothing else.
+- Family: **Roboto** (Google Fonts, also built into Google Slides; TTFs shipped at `assets/fonts/Roboto/` for PPTX embedding).
+- Weights: **300, 400, 500, 700, 900**, plus **400 italic** (pull quotes only). Nothing else.
 - Fallback chain: `Roboto, Arial, sans-serif`. Never Calibri, never Times.
 
 ## The Arrow
@@ -127,7 +138,7 @@ If you find yourself typing a hex code that is not on this list, stop. There is 
 5. Full-bleed gradient backgrounds are reserved for cover, section divider, and closing slides.
 
 ### Type
-6. Only Roboto, only weights 300/400/700/900.
+6. Only Roboto, only weights 300/400/500/700/900 (plus 400 italic for pull quotes).
 7. Headlines are 40 pt or larger; body is 18–20 pt; nothing on-screen below 14 pt.
 8. Italic is reserved for pull quotes only.
 
@@ -277,7 +288,7 @@ Use this against every demo edit, every new slide, every component addition:
 - [ ] No inline SVG paths, no data-URI SVGs, no CSS-drawn icons anywhere in the file.
 - [ ] Every `<img src>` points to one of the three files in `assets/logo/`.
 - [ ] Arrow watermarks sit flush at `top: 0; right: 0;` - fully visible, never cropped, never bleeding off the canvas.
-- [ ] Font family is Roboto with weights only from {300, 400, 700, 900}.
+- [ ] Font family is Roboto with weights only from {300, 400, 500, 700, 900}, plus 400 italic for pull quotes.
 - [ ] No `#000000` or `#FFFFFF` as a section/slide background.
 - [ ] At most **one** gradient underline per slide.
 - [ ] At most **one** primary CTA per slide.
@@ -287,6 +298,7 @@ Use this against every demo edit, every new slide, every component addition:
 - [ ] **Button content is center-aligned horizontally.**
 - [ ] **Bullet lists use `Upwards-Arrow.svg` (HTML) or `Upwards-Arrow@2x.png` (PPTX) as the marker** - no substitutes.
 - [ ] **PPTX embeds PNG (`@2x.png`) brand assets, never SVG.** HTML surfaces use SVG.
+- [ ] **Every generated `.pptx` has been run through `python scripts/embed-fonts.py`** and contains six `ppt/fonts/*.fntdata` entries (verify with `unzip -l FILE.pptx | grep fntdata`). No embedded fonts means the deck falls back to Arial on client machines - a brand violation.
 - [ ] **Every bullet item fits on one line** (`white-space: nowrap` in HTML; tight copy in PPTX).
 - [ ] **Sparse slides anchor content to the bottom**, not the top. No card row floats at the top with empty space below.
 - [ ] **Zero em-dash characters (Unicode U+2014) anywhere in the file.** Verify with `grep -P '\x{2014}' FILE` returning empty.

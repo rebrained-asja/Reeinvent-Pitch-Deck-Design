@@ -8,7 +8,7 @@
       "name": "reeinvent-pitch-deck-design",
       "source": ".",
       "description": "Reeinvent brand system and design rules for pitch decks, slides, covers, section dividers, service layouts, and any HTML / PPTX / PDF surface that ships under the Reeinvent brand.",
-      "version": "2.0.0"
+      "version": "2.1.0"
     }
   ]
 }

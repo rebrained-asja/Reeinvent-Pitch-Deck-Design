@@ -308,7 +308,7 @@ In production decks, Reeinvent uses **a wider weight range than DESIGN.md initia
 
 **Practical rule**: the hero "split title" pattern (thin-over-bold) only works when you have both **Roboto 300 and Roboto 900** installed. Embed both weights in the .pptx.
 
-Update [DESIGN.md](DESIGN.md) §3 to permit the full 300/400/700/900 range when building cover and mega-title slides.
+Update [DESIGN.md](DESIGN.md) §3 to permit the full 300/400/500/700/900 range when building cover and mega-title slides.
 
 ---
 

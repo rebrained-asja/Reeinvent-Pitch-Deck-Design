@@ -121,12 +121,12 @@ Every slide must have:
 4. **Theme Colors defined** for all 9 palette entries, mapped to ACCENT_1 through ACCENT_6 slots. Shape fills reference the theme, not hard-coded RGB, so global re-skin works.
 5. **Theme Font** set to Roboto with Arial fallback (Major + Minor Font slots).
 6. **Slide Master + Layouts per archetype.** Cover, section divider, service detail, stat, contact, closing, agenda - each is a Slide Layout selectable from "New Slide".
-7. **Fonts embedded** (`embed_font=True`) so Roboto ships with the deck.
+7. **Fonts embedded via post-processing.** python-pptx does not write embedded-font parts. After saving the .pptx, run `python scripts/embed-fonts.py OUTPUT.pptx` to inject the six Roboto TTFs from `assets/fonts/Roboto/`. Not optional - without this step the deck falls back to Arial on client machines.
 8. **Grouped elements** where they move as a unit (title + stripe + eyebrow).
 9. **Native charts** for any data visualization, not screenshots.
 10. **If any brand element cannot be rendered natively, stop - do not substitute.** Halt and report: which element failed, why native rendering failed, what alternatives exist. Never rasterize, flatten, omit, simplify "because it's close enough," or switch engines. Wait for the user to pick.
 
-**Before handing off a .pptx, verify**: click any text element (should enter edit mode), click any rectangle (should be movable), open the Theme Colors panel (9 brand colors should be present). If any element is locked as an image, regenerate.
+**Before handing off a .pptx, verify**: click any text element (should enter edit mode), click any rectangle (should be movable), open the Theme Colors panel (9 brand colors should be present), and confirm the deck file contains `ppt/fonts/*.fntdata` entries (`unzip -l FILE.pptx | grep fntdata` should show 6 entries). If any element is locked as an image or fonts are missing, regenerate.
 
 See `DESIGN.md` §12 for the full spec.
 

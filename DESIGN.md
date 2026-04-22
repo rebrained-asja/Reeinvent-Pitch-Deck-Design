@@ -80,11 +80,12 @@ This is the rule that determines which text color is legible on which background
 ## 3. Typography for Slides
 
 ### Font Family
-- **Roboto** for everything.
-  - PowerPoint / Keynote: install Roboto from Google Fonts for editor fidelity.
-  - Google Slides: Roboto is built in.
-  - PDF export: embed Roboto in the PPTX so PDF export preserves it.
-- If Roboto cannot be embedded (strict corporate templates), fall back to **Arial** - never Calibri, never Times.
+- **Roboto** for everything. Canonical weights: **300, 400, 500, 700, 900** plus **400 italic** (pull quotes only). Nothing else.
+- TTFs ship with the skill at `assets/fonts/Roboto/` (Apache 2.0). Every generated PPTX embeds them automatically (see §12.1 rule 7) so client machines without Roboto installed still render the deck correctly.
+  - PowerPoint / Keynote: the embedded fonts travel with the file.
+  - Google Slides: Roboto is built in; embedding is irrelevant but harmless.
+  - PDF export: embedded fonts render correctly regardless of source machine.
+- Fallback to **Arial** is permitted only when the target platform strips embedded fonts (strict corporate templates). Never Calibri, never Times.
 
 ### Slide Type Scale (16:9, 13.333″ × 7.5″)
 
@@ -499,7 +500,7 @@ Every PPTX deck Claude generates must be **fully editable by the presenter in Po
 4. **Theme Colors defined.** The 9 canonical hex codes are registered as PPTX Theme Colors in the `theme1.xml` of the .pptx package. Shape fills reference Theme Color slots (for example `MSO_THEME_COLOR.ACCENT_1` mapped to Core Blue) rather than hard-coding RGB on every shape. This lets a global palette change propagate.
 5. **Theme Font set to Roboto** with Arial as fallback. Set via the theme's Major Font + Minor Font definitions.
 6. **Slide Master + Layouts per archetype.** The Slide Master defines the wordmark stamp, footer page number, and default typography. One Slide Layout exists per production archetype (cover, section divider, service detail, stat, contact, closing, agenda, etc. per `reference.md`). When the presenter adds a new slide from the "New Slide" menu, each layout is available as a brand-correct starting point.
-7. **Fonts embedded.** Save with `embed_font=True` (or the PowerPoint equivalent) so the deck renders correctly on machines without Roboto installed.
+7. **Fonts embedded via post-processing.** python-pptx itself does not write embedded-font parts - you must run `python scripts/embed-fonts.py OUTPUT.pptx` after python-pptx saves. The script injects the six TTFs from `assets/fonts/Roboto/` as OOXML `ppt/fonts/*.fntdata` parts and registers the `<p:embeddedFontLst>`, so the deck renders correctly on any machine without Roboto installed. **Not optional.** A .pptx without embedded Roboto falls back to Arial on client machines and is a brand violation.
 8. **Group related elements.** When a title, its gradient stripe, and its eyebrow should move as a unit, group them (`Slide.shapes.add_group_shape()`). The presenter moves one block, not three pieces.
 9. **Charts as native charts, not screenshots.** Any stat visualization, bar chart, line chart is a native PPTX chart object the presenter can edit. Not a flattened image.
 10. **If any brand element cannot be rendered natively, stop - do not substitute.**
