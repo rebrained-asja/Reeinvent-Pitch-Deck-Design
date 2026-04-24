@@ -299,6 +299,9 @@ Use this against every demo edit, every new slide, every component addition:
 - [ ] **Bullet lists use `Upwards-Arrow.svg` (HTML) or `Upwards-Arrow@2x.png` (PPTX) as the marker** - no substitutes.
 - [ ] **PPTX embeds PNG (`@2x.png`) brand assets, never SVG.** HTML surfaces use SVG.
 - [ ] **Every generated `.pptx` has been run through `python scripts/embed-fonts.py`** and contains six `ppt/fonts/*.fntdata` entries (verify with `unzip -l FILE.pptx | grep fntdata`). No embedded fonts means the deck falls back to Arial on client machines - a brand violation.
+- [ ] **PPTX text frames inside fixed-geometry cards use `normAutofit`, not `spAutoFit`.** Card boundaries hold; text shrinks if it overflows. Verify with `unzip -p FILE.pptx 'ppt/slides/*.xml' | grep -c spAutoFit` returning 0 for card text frames.
+- [ ] **PPTX stat numbers and headline-scale text (≥ 40 pt) carry Signature Gradient text fill, not solid Core Blue.** Per DESIGN.md §3 + §6.5 + §12.1 rule 12.
+- [ ] **Every PPTX text role's font weight matches the §3 type scale exactly.** Stat numbers are 700, not 900. Body is 400, not 500. Cross-check every text role against the type-scale table before saving.
 - [ ] **Every bullet item fits on one line** (`white-space: nowrap` in HTML; tight copy in PPTX).
 - [ ] **Sparse slides anchor content to the bottom**, not the top. No card row floats at the top with empty space below.
 - [ ] **Zero em-dash characters (Unicode U+2014) anywhere in the file.** Verify with `grep -P '\x{2014}' FILE` returning empty.
