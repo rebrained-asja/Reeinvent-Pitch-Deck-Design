@@ -22,7 +22,7 @@ How you install depends on which Claude surface you use. All three install the s
 In the terminal, paste:
 
 ```
-/plugin marketplace add rebrained-asja/Reeinvent-Pitch-Deck-Design
+/plugin marketplace add rebrained-de/Reeinvent-Pitch-Deck-Designer
 ```
 
 Then install the plugin:
@@ -36,7 +36,7 @@ Then install the plugin:
 The `/plugin` slash commands do **not** work in Desktop's chat input. Install via the GUI instead:
 
 1. Open **Settings → Code → Plugins** in the Desktop app.
-2. Add the marketplace: `rebrained-asja/Reeinvent-Pitch-Deck-Design`.
+2. Add the marketplace: `rebrained-de/Reeinvent-Pitch-Deck-Designer`.
 3. Install the `reeinvent-pitch-deck-design` plugin from the list.
 
 ### Verify the install
@@ -55,14 +55,14 @@ For offline installs or environments where the plugin marketplace is unavailable
 
 ### Option A - Download the ZIP
 
-1. Go to the [repository page](https://github.com/rebrained-asja/Reeinvent-Pitch-Deck-Design).
+1. Go to the [repository page](https://github.com/rebrained-de/Reeinvent-Pitch-Deck-Designer).
 2. Click the green **Code** button on the top right, then **Download ZIP**.
 3. Unzip the folder somewhere you'll remember, for example `~/Documents/Reeinvent-Brand`.
 
 ### Option B - Clone with Git
 
 ```bash
-git clone https://github.com/rebrained-asja/Reeinvent-Pitch-Deck-Design.git
+git clone https://github.com/rebrained-de/Reeinvent-Pitch-Deck-Designer.git
 ```
 
 ### Using the fallback install

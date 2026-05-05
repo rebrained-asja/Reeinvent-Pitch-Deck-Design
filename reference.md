@@ -345,5 +345,5 @@ After reviewing the master deck, the following refinements should be added to [D
 
 ## Sources
 
-- `/Users/rebrained/Downloads/REE 2.0 – Master Company Presentation (Compressed).pdf` (21 slides) - the full master deck, covering cover, intro, AI-driven positioning, 8 service details, success stories chapter, 3 case studies, AI-native approach, audience segmentation, Trident partnership, offices map, contact, thank-you.
+- *REE 2.0 - Master Company Presentation (Compressed).pdf* (21 slides) - the full master deck, covering cover, intro, AI-driven positioning, 8 service details, success stories chapter, 3 case studies, AI-native approach, audience segmentation, Trident partnership, offices map, contact, thank-you. Held internally; ask your Rebrained contact for the source file.
 - *2-Pager Company Presentation* (116 MB, not inspectable within file-size limits) - deferred; expected to overlap with the master deck's service-detail and success-story archetypes.

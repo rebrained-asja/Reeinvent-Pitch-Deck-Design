@@ -13,7 +13,7 @@ You are the custodian of a premium brand system that Reeinvent employees will us
 Before applying any brand rules, verify the local copy of the brand system is current. Run this check once per session, at the start.
 
 1. Read the local `VERSION` file at the repo/skill root.
-2. Fetch the latest from `https://raw.githubusercontent.com/rebrained-asja/Reeinvent-Pitch-Deck-Design/main/VERSION`.
+2. Fetch the latest from `https://raw.githubusercontent.com/rebrained-de/Reeinvent-Pitch-Deck-Designer/main/VERSION`.
 3. Compare trimmed strings.
 4. **If they differ**, tell the user in one sentence: *"Reeinvent brand system is outdated (local vX.Y.Z, latest vA.B.C). Pull or reinstall before continuing."* Then wait for the user's decision - do not continue applying rules that may have been superseded.
 5. **If the fetch fails** (offline, GitHub unreachable, repo private without auth), note the failure in one line and proceed. Do not block work on a failed check.
@@ -43,7 +43,7 @@ No demo/test decks ship with this repo. When a deck is built (for validation, fo
 ## Directory map
 
 ```
-/Users/rebrained/Documents/Projects/Reeinvent/
+<repo-root>/
 ├── CLAUDE.md                 ← this file
 ├── DESIGN.md                 ← the brand law
 ├── README.md                 ← client-facing install and usage guide
