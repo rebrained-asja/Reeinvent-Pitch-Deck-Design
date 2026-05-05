@@ -6,6 +6,16 @@ The version your install runs is in [VERSION](VERSION). Claude reports it on ses
 
 ---
 
+## v2.4.0 - 2026-05-05
+
+**Vector PDF export for client distribution.** Adds `scripts/render-pdf.py` so HTML decks can render directly to PDF via headless Chrome - SVGs and gradients stay vector all the way to the deliverable. The previous default path (HTML -> PPTX -> LibreOffice PDF) downsampled and JPEG-recompressed every embedded image; logos and gradient bands degraded visibly at any zoom. The new path is the canonical client-distribution flow.
+
+- Added `skills/reeinvent-pitch-deck-design/scripts/render-pdf.py`. Auto-detects Chrome on macOS / Linux, injects an `@page` size rule for slide-shaped PDFs, renders in place so relative SVG paths resolve.
+- Updated CLAUDE.md "Export / convert to PPTX or PDF" with a decision table mapping goal -> source format -> tool, plus the rule "never route HTML -> PPTX -> PDF for a client deliverable."
+- Updated CLAUDE.md asset routing for `PDF via HTML print` to point at `scripts/render-pdf.py`.
+
+No brand-rule changes. PPTX builds and PDF builds from existing HTML are bit-identical to v2.3.2; v2.4.0 only adds a new export path.
+
 ## v2.3.2 - 2026-05-05
 
 **Claude Desktop install fix.** v2.3.1 installed cleanly via Claude Code CLI but failed in Claude Desktop. Root cause: the marketplace manifest used a shape that CLI tolerates and Desktop rejects. No brand-rule changes; decks built on v2.3.1 are bit-identical on v2.3.2.

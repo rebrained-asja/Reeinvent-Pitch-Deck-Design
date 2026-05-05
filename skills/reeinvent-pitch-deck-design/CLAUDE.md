@@ -51,7 +51,8 @@ skills/reeinvent-pitch-deck-design/
 ├── DESIGN.md                 ← the brand law
 ├── reference.md              ← pattern library from production decks
 ├── scripts/
-│   └── embed-fonts.py        ← OOXML post-processor, embeds Roboto TTFs into generated .pptx
+│   ├── embed-fonts.py        ← OOXML post-processor, embeds Roboto TTFs into generated .pptx
+│   └── render-pdf.py         ← HTML deck → vector PDF via headless Chrome (use for client distribution)
 └── assets/
     ├── logo/                 ← the four canonical brand marks - SVG + PNG pairs
     │   ├── Arrow-Up.svg            ← background watermark arrow (native fill #F5F5F5)
@@ -80,8 +81,8 @@ inside skills/reeinvent-pitch-deck-design/.
 **Asset routing by output format:**
 - **HTML / web surfaces** → use the `.svg` file. Browsers render SVG natively at any size.
 - **PPTX / Google Slides** → use the `@2x.png` file. PPTX and Slides render SVG imports unreliably (missing fills, placeholder rectangles, gradient collapse). PNG embedded via `add_picture()` is universally reliable.
-- **PDF via HTML print** → use the `.svg` file (browser handles it).
-- **PDF via PPTX export** → use the `@2x.png` file (PPTX is the source).
+- **PDF via HTML print** → use the `.svg` file. Run `scripts/render-pdf.py` so SVGs stay vector all the way to PDF. Browser print works too if the HTML has `@page` and `@media print` rules.
+- **PDF via PPTX export** → use the `@2x.png` file (PPTX is the source). Avoid for client-distributed PDFs because LibreOffice / PowerPoint downsample and JPEG-recompress the embedded PNGs.
 
 **The two arrows are not interchangeable.** `Arrow-Up` is the background watermark (used at top-right of cover / divider / closing slides). `Upwards-Arrow` is the bullet marker (used only inside list items). Each has one job.
 
@@ -243,10 +244,28 @@ Claude makes these mistakes by default. Pre-empt them.
 5. Invoke **`normalize`** to verify the fix didn't introduce a new violation elsewhere.
 
 ### "Export / convert to PPTX or PDF"
-- HTML decks should include `@media print` rules (flatten slides to full-page layout) so browser print-to-PDF produces a clean deck.
-- For real `.pptx` output, invoke the **`anthropic-skills:pptx`** skill.
-- For PDF reads/exports, invoke the **`anthropic-skills:pdf`** skill.
-- DESIGN.md §12 documents the export settings presenters follow.
+
+**Decide the source format first - it determines PDF quality.**
+
+| Goal | Use this path | Why |
+|------|---------------|-----|
+| Best-quality PDF for client distribution | HTML deck -> `scripts/render-pdf.py` (headless Chrome) | SVGs stay vector, gradients stay vector, fonts embed cleanly. No raster compression. |
+| Editable `.pptx` the presenter can tweak in PowerPoint / Keynote | python-pptx via `anthropic-skills:pptx` | Native shapes + live text + theme colors per DESIGN.md §12. Run `scripts/embed-fonts.py` after. |
+| PDF when the source is already `.pptx` | LibreOffice or PowerPoint export | Acceptable for editing-flow PDFs. Lossy: PNGs get downsampled and JPEG-recompressed - logos and gradient bands degrade visibly versus the HTML source. |
+
+**Never** route HTML -> PPTX -> PDF for a client deliverable. The PPTX step rasterizes vectors, and the PDF step compresses the rasters again. Two passes of quality loss for a deliverable that the user will only ever view, not edit.
+
+The canonical client-distribution flow is:
+
+```
+build the deck as HTML (SVGs, CSS, no rasterization)
+└─> python3 scripts/render-pdf.py deck.html        # vector PDF
+    + (optional, if presenter wants to edit)
+    └─> python-pptx build to deck.pptx              # editable .pptx
+        + python3 scripts/embed-fonts.py deck.pptx  # Roboto embedded
+```
+
+DESIGN.md §12 documents the PPTX-side rules. The HTML deck must include `@media print` rules so `render-pdf.py` (or the user's own browser print) flattens cleanly.
 
 ## Available skills
 

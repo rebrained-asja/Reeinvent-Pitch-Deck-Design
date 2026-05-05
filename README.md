@@ -133,6 +133,7 @@ The brand-system files live at `skills/reeinvent-pitch-deck-design/` inside the 
 - **assets/logo/** - The four brand marks, each as SVG (for HTML / web) and PNG at 2x (for PPTX / Slides embedding).
 - **assets/fonts/Roboto/** - Roboto TTFs (Apache 2.0), auto-embedded into every generated `.pptx`.
 - **scripts/embed-fonts.py** - PPTX post-processor that embeds Roboto into output decks.
+- **scripts/render-pdf.py** - HTML deck → vector PDF via headless Chrome. Use for client-distributed PDFs so SVGs and gradients stay vector instead of getting downsampled by the PPTX → PDF route.
 
 Distribution metadata at the repo root: `README.md`, `CHANGELOG.md`, `VERSION`, `.claude-plugin/`.
 
