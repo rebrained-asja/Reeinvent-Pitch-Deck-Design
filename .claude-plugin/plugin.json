@@ -1,7 +1,7 @@
 {
   "name": "reeinvent-pitch-deck-design",
-  "version": "2.4.0",
-  "description": "Reeinvent brand system and design rules for pitch decks, slides, covers, section dividers, service layouts, and any HTML / PPTX / PDF surface that ships under the Reeinvent brand.",
+  "version": "3.0.0",
+  "description": "Reeinvent brand system + deterministic PPTX generator. Produces brand-perfect editable decks (theme colors, embedded Roboto, native shapes, gradient text on stat numbers) from a JSON spec via one command. Also enforces brand rules on any HTML / PPTX / PDF surface.",
   "author": {
     "name": "Reeinvent"
   },

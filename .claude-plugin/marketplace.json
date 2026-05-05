@@ -4,16 +4,16 @@
     "name": "Reeinvent"
   },
   "metadata": {
-    "description": "Reeinvent brand system marketplace. One plugin: reeinvent-pitch-deck-design.",
-    "version": "2.4.0"
+    "description": "Reeinvent brand system + PPTX generator. One plugin: reeinvent-pitch-deck-design.",
+    "version": "3.0.0"
   },
   "plugins": [
     {
       "name": "reeinvent-pitch-deck-design",
-      "description": "Reeinvent brand system and design rules for pitch decks, slides, covers, section dividers, service layouts, and any HTML / PPTX / PDF surface that ships under the Reeinvent brand.",
+      "description": "Reeinvent brand system + deterministic PPTX generator. Builds brand-perfect editable decks from a JSON spec; enforces brand rules on every HTML / PPTX / PDF surface.",
       "source": "./",
       "strict": false,
-      "version": "2.4.0",
+      "version": "3.0.0",
       "skills": [
         "./skills/reeinvent-pitch-deck-design"
       ]

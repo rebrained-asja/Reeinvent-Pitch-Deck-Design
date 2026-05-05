@@ -217,10 +217,11 @@ Claude makes these mistakes by default. Pre-empt them.
 ## How to handle common requests
 
 ### "Create a test layout / deck / slide"
-1. Identify the archetype from `reference.md` (A1–A10) or the DESIGN.md template (§6).
-2. Use only the 9 colors, the 3 gradients, Roboto, and the SVG assets.
+1. Identify the archetype from `reference.md` (A1-A10) or the DESIGN.md template (§6).
+2. Write a JSON spec at `<cwd>/deck.json` using the schema in `SKILL.md`.
 3. Populate with generic placeholders (`Headline`, `Service Name`, `Audience One`).
-4. Invoke **`normalize`** to verify DESIGN.md compliance, then run the pre-flight checklist, before responding "done."
+4. Run `<skill_root>/bin/reeinvent-deck build <cwd>/deck.json -o <cwd>/deck.pptx`. The generator validates the spec, applies brand rules, embeds Roboto, and verifies before returning.
+5. If the user requests a screenshot review afterwards, walk the deck against the pre-flight checklist below and surface any remaining issue.
 
 ### "Add a new rule / change a rule"
 1. Read the existing section in DESIGN.md.
@@ -237,11 +238,11 @@ Claude makes these mistakes by default. Pre-empt them.
 5. Then use it in demos.
 
 ### "Fix a demo"
-1. If the user sent a screenshot, invoke **`critique`** first for a structured assessment.
-2. Identify which DESIGN.md rule the current rendering violates.
-3. Quote the rule.
-4. Make the minimal edit that brings the demo into compliance.
-5. Invoke **`normalize`** to verify the fix didn't introduce a new violation elsewhere.
+1. If the user sent a screenshot, walk through the brand rules in section order and identify each violation.
+2. For each: quote the DESIGN.md rule and the section number.
+3. If the deck was generated, edit the spec or the relevant builder under `generator/reeinvent_pitch_deck/builders/`, then rebuild.
+4. If the deck was authored by hand, make the minimal direct edit.
+5. Re-run the generator's verify step (`bin/reeinvent-deck verify deck.pptx`) before responding "done."
 
 ### "Export / convert to PPTX or PDF"
 
@@ -249,57 +250,46 @@ Claude makes these mistakes by default. Pre-empt them.
 
 | Goal | Use this path | Why |
 |------|---------------|-----|
+| Editable `.pptx` (the canonical Reeinvent deliverable) | `bin/reeinvent-deck build deck.json -o deck.pptx` | Deterministic generator: theme colors, embedded fonts, native shapes, gradient text on stat numbers, all per DESIGN.md §12. One command, no hand-rolled python-pptx. |
 | Best-quality PDF for client distribution | HTML deck -> `scripts/render-pdf.py` (headless Chrome) | SVGs stay vector, gradients stay vector, fonts embed cleanly. No raster compression. |
-| Editable `.pptx` the presenter can tweak in PowerPoint / Keynote | python-pptx via `anthropic-skills:pptx` | Native shapes + live text + theme colors per DESIGN.md §12. Run `scripts/embed-fonts.py` after. |
-| PDF when the source is already `.pptx` | LibreOffice or PowerPoint export | Acceptable for editing-flow PDFs. Lossy: PNGs get downsampled and JPEG-recompressed - logos and gradient bands degrade visibly versus the HTML source. |
+| PDF when the source is already `.pptx` | LibreOffice or PowerPoint export of the generator output | Acceptable for editing-flow PDFs. Lossy: PNGs get downsampled and JPEG-recompressed; logos and gradient bands degrade slightly. |
 
-**Never** route HTML -> PPTX -> PDF for a client deliverable. The PPTX step rasterizes vectors, and the PDF step compresses the rasters again. Two passes of quality loss for a deliverable that the user will only ever view, not edit.
+**Never** route HTML -> PPTX -> PDF for a client deliverable. The PPTX step rasterizes vectors and the PDF step compresses the rasters again.
 
-The canonical client-distribution flow is:
+**The canonical PPTX flow is the generator.** Spec in, deck out:
 
 ```
-build the deck as HTML (SVGs, CSS, no rasterization)
-└─> python3 scripts/render-pdf.py deck.html        # vector PDF
-    + (optional, if presenter wants to edit)
-    └─> python-pptx build to deck.pptx              # editable .pptx
-        + python3 scripts/embed-fonts.py deck.pptx  # Roboto embedded
+write deck.json (one entry per slide, archetype + content)
+└─> bin/reeinvent-deck build deck.json -o deck.pptx
+    └─> generator runs python-pptx + applies brand theme + post-embeds Roboto + verifies
 ```
 
-DESIGN.md §12 documents the PPTX-side rules. The HTML deck must include `@media print` rules so `render-pdf.py` (or the user's own browser print) flattens cleanly.
+The generator covers the 12 production archetypes (cover, section_divider, intro_split, content, two_column, stat, three_up, quote, closing, agenda, service_detail, success_story). See `SKILL.md` "Spec format" for the full schema and `generator/examples/reeinvent-full.json` for a populated reference deck.
 
-## Available skills
+If the user needs an archetype the generator does not support, surface that and ask whether to add a new builder under `generator/reeinvent_pitch_deck/builders/` (treated as a brand-system addition; follow the propose-then-confirm rule).
 
-Six specialized skills are installed. When a request matches one of these triggers, **invoke the skill via the Skill tool first** instead of doing the work by hand. These are pre-built capabilities - they do the job faster and more reliably than ad-hoc effort.
+DESIGN.md §12 documents the PPTX-side rules; the generator encodes them. Do not regenerate brand elements by hand.
 
-### `anthropic-skills:pptx` - PowerPoint file handling
-**Trigger**: any request involving a `.pptx` file - creating, reading, editing, extracting content, combining, or generating a deck from the rules in DESIGN.md.
-**Invoke when the user says**: "make a .pptx", "convert this deck to PowerPoint", "open the master deck", "extract the slides from [file].pptx", "build a deck matching our system as a .pptx file".
+## The generator (single source of PPTX truth)
 
-### `anthropic-skills:pdf` - PDF file handling
-**Trigger**: any request involving a `.pdf` - reading reference decks, extracting text / tables / images, merging exports, running OCR, exporting the pitch deck to PDF.
-**Invoke when the user says**: "read the reference deck", "extract the brand guide's typography", "export the pitch deck to PDF", "merge these PDFs", "what does the 2-pager look like?".
+Building a PPTX deck means: write a JSON spec, then run the generator. **Do not hand-roll python-pptx.** The generator at `bin/reeinvent-deck` encodes every brand rule once, applies them deterministically, and verifies the output before returning. Hand-rolled code is how brand violations sneak in.
 
-### `normalize` - design-system compliance audit
-**Trigger**: checking whether something complies with DESIGN.md. This is this project's core loop - use liberally.
-**Invoke when the user says**: "is this on brand?", "does this follow the rules?", "clean this up to match the system", "audit against DESIGN.md", or when you finish a non-trivial demo edit and want to self-verify before responding "done".
+```bash
+<skill_root>/bin/reeinvent-deck build deck.json -o deck.pptx
+```
 
-### `polish` - pre-ship quality pass
-**Trigger**: catching alignment, spacing, and micro-detail issues before a deck ships. Run after substantive edits, always run before the user takes the deck to a real audience.
-**Invoke when the user says**: "polish this", "final pass", "getting ready to ship", "last tune-up", or when you're about to respond "done" on a deck that will be presented externally.
+The wrapper auto-creates a Python venv on first run. No pip install, no manual setup. Subsequent runs reuse it. If `requirements.txt` changes, the venv rebuilds automatically.
 
-### `critique` - UX / visual design review
-**Trigger**: structured design feedback. Use when the user sends a screenshot, says something looks "off," or asks "what's wrong here?".
-**Invoke when the user says**: "review this slide", "this looks wrong", "what's off about this?", or sends a screenshot of a working deck asking for feedback. **Run `critique` before `polish`** when both could apply - critique identifies problems, polish fixes finish details.
+Spec schema and archetype list: see `SKILL.md` "Spec format". Reference example: `generator/examples/reeinvent-full.json`.
 
-### `audit` - technical quality check
-**Trigger**: accessibility, responsive behavior, and anti-pattern checks before a deck is exported to PDF or sent externally.
-**Invoke when the user says**: "is this accessible?", "run an audit", "WCAG check", "responsive test", or before any PDF export that will be distributed beyond internal review.
+### Workflow phases (named for shared vocabulary)
 
-### Skill invocation notes
-- Use the `Skill` tool with the exact skill name (including the `anthropic-skills:` prefix for `pptx` and `pdf`).
-- When multiple skills could apply, pick the most specific first - e.g., a screenshot of a slide with spacing issues → `critique` first, then `polish`.
-- When in doubt whether a skill applies, **run it**. Cost of invoking a skill is low; cost of hand-rolling work a skill would have done better is high.
-- Never mention a skill name without invoking it.
+These are not separate tools or skills, just the named phases of the work. Reference them when you describe what you are doing.
+
+- **normalize** - check the spec or output against DESIGN.md before saving. The generator's spec validator and post-build verify already enforce most of this; if you spot a remaining gap, fix the relevant builder.
+- **critique** - structured design feedback when the user sends a screenshot or says something is off. Identify the DESIGN.md rule the rendering violates, quote it, propose the minimal fix.
+- **polish** - pre-ship pass for alignment, spacing, type-scale adherence. The generator handles most of this; the residual is content (placeholder text quality, archetype choice).
+- **audit** - accessibility / WCAG / contrast check before a deck ships externally.
 
 ## Pre-flight checklist (run before saying "done")
 

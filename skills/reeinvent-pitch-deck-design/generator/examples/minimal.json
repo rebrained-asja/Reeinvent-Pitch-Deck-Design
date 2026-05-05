@@ -1,0 +1,32 @@
+{
+  "title": "Minimal Reeinvent Test",
+  "author": "Reeinvent",
+  "date": "2026-05-05",
+  "slides": [
+    {
+      "archetype": "cover",
+      "background": "ink",
+      "eyebrow": "AI-FIRST ENGINEERING PARTNER",
+      "title": "From ideas to scalable AI solutions in weeks.",
+      "highlight_words": ["in weeks"],
+      "subtitle": "We help companies identify where AI creates value and build the solutions to deliver it."
+    },
+    {
+      "archetype": "section_divider",
+      "section_label": "SECTION 01 / 03",
+      "title": "How we ship in weeks",
+      "description": "From first conversation to a system your users can touch."
+    },
+    {
+      "archetype": "stat",
+      "number": "6 wk",
+      "label": "AVG. IDEA TO PROD",
+      "supporting": "From first conversation to a system your users can touch."
+    },
+    {
+      "archetype": "closing",
+      "message": "Let's build it.",
+      "cta_label": "Book a call"
+    }
+  ]
+}

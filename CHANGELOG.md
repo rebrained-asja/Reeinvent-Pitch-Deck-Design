@@ -6,6 +6,61 @@ The version your install runs is in [VERSION](VERSION). Claude reports it on ses
 
 ---
 
+## v3.0.0 - 2026-05-05
+
+**Deterministic PPTX generator. End of hand-rolled python-pptx.** v2.x shipped the brand law, assets, and a font-embed post-processor, but every PPTX request asked Claude to write python-pptx code from scratch while remembering 32 brand rules. The result was non-deterministic output that drifted between sessions: theme colors sometimes missing, gradient text sometimes solid Core Blue, autofit sometimes wrong, embed sometimes skipped. v3.0.0 replaces that with a code-driven pipeline that encodes every rule once and outputs production-grade decks.
+
+**Premium polish (caught during pre-release review)**
+
+- Card components now carry the brand-correct Ink-tinted drop shadow (0pt x 4pt, 16pt blur, Ink at 8% alpha). v3.0.0-alpha cards rendered as flat rectangles which read as cheap; this is the single biggest visual lift.
+- Chat-bubble callouts now have the canonical triangular tail (built-in isosceles triangle primitive, rotated to point at the labeled element). Used on service-detail and success-story slides per reference.md. Renders consistently across PowerPoint, Keynote, Slides, and LibreOffice.
+- Two-column right card now hugs its content with symmetric padding instead of stretching full-height. No more wasted whitespace.
+- Agenda right column row spacing scales with item count so titles plus descriptions never clip.
+- Cover slide eyebrow is now solid white (gradient stripe sits below) per DESIGN.md rule 23 - solid blue or gradient text under 40 pt on dark surfaces is prohibited. Fixes a brand violation that v3.0.0-alpha shipped.
+- Cover slide gradient underline placed under the title's first word, never the highlighted phrase, satisfying rule 11 (no stacking of gradient-text + underline on the same word).
+- Closing slide mega message bumped to 72 pt with tighter pill spacing and a properly visible centered wordmark.
+- Closing slide hero arrow re-rasterized at 8x source resolution from the SVG so PowerPoint scaling stops aliasing.
+- Arrow watermark opacity raised to the spec ceiling (10% on dark, 6% on light) so the signature mark reads on small renders and dim projector rooms.
+- Service detail tagline and URL repositioned within the safe area; no more clipping.
+- Intro split title sizes bumped to reference.md A3 spec (72 pt thin over 120 pt black) for the dramatic two-line hero treatment.
+
+**Spec additions for production decks**
+
+- `image: "path/to/photo.jpg"` field on `intro_split`, `service_detail`, and `success_story`. The builder embeds the supplied image; absent, it draws a labeled placeholder so the slot is unmistakably "needs your screenshot here." This is the path to "ready for the CFO" decks: drop in real photography, every slot has known geometry.
+- `notes: "..."` field on every archetype, written into the slide's notes pane for the presenter.
+
+**What's new**
+
+- `generator/` Python package (`reeinvent_pitch_deck`). Spec in, brand-perfect `.pptx` out.
+  - 12 archetype builders covering DESIGN.md section 6 (cover, section_divider, content, two_column, stat, three_up, quote, closing, agenda) and reference.md A1-A6 (intro_split, service_detail, success_story).
+  - `theme.py`: 9 colors, 3 gradients, full type scale, geometry constants. Single source of truth.
+  - `master.py`: patches the slide master's `theme1.xml` so the 9 brand colors register as Theme Colors (dk1, lt1, dk2, lt2, accent1-6) and theme fonts are Roboto. Re-skinning the deck is one Theme Colors panel away.
+  - `helpers.py`: native `<a:gradFill>` for shape and text runs (30 deg, both stops), arrow watermark with correct opacity, brand stamp, gradient stripes / pills / chat bubbles, arrow bullet markers, recolor effect for arrow-on-light-bg, normAutofit on cards.
+  - `embed.py`: ports the v2.x font-embed logic into the package (the old `scripts/embed-fonts.py` still works).
+  - `verify.py`: post-build pre-flight covering 6 Roboto fntdata entries, all 9 brand colors in theme XML, no em-dash anywhere, no spAutoFit, 16:9 widescreen canvas.
+  - `cli.py`: `reeinvent-deck build | verify | embed`.
+  - `spec.py`: strict JSON validator. Unknown fields raise. Em-dash anywhere in any text raises. Bullet lists capped at 6 (DESIGN.md bullet rule 5). Three-up exactly 3 cards. All bounds enforced before a single shape is drawn.
+- `bin/reeinvent-deck` bash wrapper. Auto-creates a Python venv on first run, installs `python-pptx`, invokes the CLI. Idempotent (cached via `requirements.txt` hash). Works from any cwd. **No manual pip install required.**
+- `generator/examples/reeinvent-full.json`: 12-slide reference deck exercising every archetype.
+- 19 tests (`tests/test_spec.py`, `tests/test_build.py`) covering spec validation, end-to-end deck build, theme color presence, font embedding, gradient text on stat numbers, no spAutoFit, no em-dash, canvas size.
+- CI rebuilt: pytest job runs all 19 tests and additionally builds the full example via the CLI, runs verify, asserts 6 fntdata entries, asserts no spAutoFit. Bootstrap-script idempotency covered as a separate step. Lint job adds a fourth file (`pyproject.toml`) to the version-sync check.
+
+**SKILL.md / CLAUDE.md rewrites**
+
+- Removed the v2.x delegation to `anthropic-skills:pptx`. Decks are now built via `bin/reeinvent-deck`. Hand-rolled python-pptx is explicitly forbidden.
+- Removed mentions of nonexistent skills (`normalize`, `polish`, `critique`, `audit`) as Skill-tool invocations; kept the names as workflow phases. The skill's actual capability surface is the generator + the brand law files; that is now what the docs describe.
+- Spec format documented inline in SKILL.md so Claude can produce correct JSON without reading source code.
+
+**README rewrite**
+
+- Updated install paths (unchanged commands) and added a "Generating a deck without Claude" section so the generator is usable from a script or CI without going through Claude.
+- Added the 12-archetype table.
+- Updated the directory map.
+
+**Decks built on v2.x will keep working**, but they were authored by hand. v3.0.0 is the first version where the deck pipeline is deterministic. Future decks should go through the generator. The breaking change for **users** is zero (install command is the same, output is `.pptx`). The breaking change for **DESIGN.md** is also zero (no rule additions, no rule changes). The breaking change is internal: the skill no longer asks Claude to compose python-pptx code; it asks Claude to compose a JSON spec.
+
+**Migration**: re-install the plugin (`/plugin update reeinvent-pitch-deck-design@reeinvent-brand-system`). The bootstrap will create the venv on the first deck request. No other action required.
+
 ## v2.4.0 - 2026-05-05
 
 **Vector PDF export for client distribution.** Adds `scripts/render-pdf.py` so HTML decks can render directly to PDF via headless Chrome - SVGs and gradients stay vector all the way to the deliverable. The previous default path (HTML -> PPTX -> LibreOffice PDF) downsampled and JPEG-recompressed every embedded image; logos and gradient bands degraded visibly at any zoom. The new path is the canonical client-distribution flow.
