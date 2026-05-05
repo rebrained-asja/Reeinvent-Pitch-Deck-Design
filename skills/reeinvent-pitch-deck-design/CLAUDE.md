@@ -42,13 +42,13 @@ No demo/test decks ship with this repo. When a deck is built (for validation, fo
 
 ## Directory map
 
+The brand system lives at `skills/reeinvent-pitch-deck-design/` inside the plugin repo. Paths in this document are relative to that skill directory unless noted.
+
 ```
-<repo-root>/
-├── CLAUDE.md                 ← this file
+skills/reeinvent-pitch-deck-design/
+├── SKILL.md                  ← skill manifest, auto-invoked on brand triggers
+├── CLAUDE.md                 ← this file - 32 rules + working posture
 ├── DESIGN.md                 ← the brand law
-├── README.md                 ← client-facing install and usage guide
-├── SKILL.md                  ← skill manifest for Claude Code / Cowork installs
-├── VERSION                   ← semver, bumped on any brand-system edit
 ├── reference.md              ← pattern library from production decks
 ├── scripts/
 │   └── embed-fonts.py        ← OOXML post-processor, embeds Roboto TTFs into generated .pptx
@@ -71,6 +71,10 @@ No demo/test decks ship with this repo. When a deck is built (for validation, fo
             ├── Roboto-Bold.ttf      ← weight 700
             ├── Roboto-Black.ttf     ← weight 900
             └── LICENSE.txt          ← Apache 2.0
+
+The repo also has README.md, CHANGELOG.md, VERSION, and .claude-plugin/ at the
+root - those are distribution metadata, not brand content. Edit brand files
+inside skills/reeinvent-pitch-deck-design/.
 ```
 
 **Asset routing by output format:**

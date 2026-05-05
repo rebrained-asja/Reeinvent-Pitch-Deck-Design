@@ -6,12 +6,22 @@ The version your install runs is in [VERSION](VERSION). Claude reports it on ses
 
 ---
 
+## v2.3.0 - 2026-05-05
+
+**Plugin-installable for real.** v2.2.2 advertised plugin install but Claude Desktop returned "Failed to install plugin" on the install handshake - the package was missing `.claude-plugin/plugin.json` (the plugin manifest), and the skill content was at the repo root rather than under `skills/<name>/`. v2.3.0 fixes both.
+
+- Added `.claude-plugin/plugin.json` so Claude Code / Desktop / Cowork accept the install.
+- Moved the skill content (SKILL.md, CLAUDE.md, DESIGN.md, reference.md, assets, scripts) to `skills/reeinvent-pitch-deck-design/` so the skill auto-discovers after install.
+- Updated README and CLAUDE.md directory maps to reflect the new layout. Manual / fallback installs now `cd` into `skills/reeinvent-pitch-deck-design/` instead of the repo root.
+
+**No brand-rule changes.** Decks built on v2.2.x are bit-identical on v2.3.0.
+
 ## v2.2.2 - 2026-05-05
 
-**Client launch cut.** Same brand rules as v2.2.1; this release adds the CHANGELOG and tightens distribution hygiene so the install package is truly plug-and-play.
+**Client launch cut (broken install path).** Added CHANGELOG and tightened `.gitignore`. Plugin install was advertised but did not work - see v2.3.0 for the fix. **Do not install v2.2.2.**
 
 - Added this CHANGELOG so installs can see release history at a glance.
-- Tightened `.gitignore` to exclude generated decks, slide rasters, `*.bak`, and Python caches - prevents accidental test-artifact commits during workshop work.
+- Tightened `.gitignore` to exclude generated decks, slide rasters, `*.bak`, and Python caches.
 
 ## v2.2.1 - 2026-05-05
 

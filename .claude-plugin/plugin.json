@@ -1,0 +1,10 @@
+{
+  "name": "reeinvent-pitch-deck-design",
+  "version": "2.3.0",
+  "description": "Reeinvent brand system and design rules for pitch decks, slides, covers, section dividers, service layouts, and any HTML / PPTX / PDF surface that ships under the Reeinvent brand.",
+  "author": {
+    "name": "Reeinvent"
+  },
+  "homepage": "https://github.com/rebrained-de/Reeinvent-Pitch-Deck-Designer",
+  "repository": "https://github.com/rebrained-de/Reeinvent-Pitch-Deck-Designer"
+}

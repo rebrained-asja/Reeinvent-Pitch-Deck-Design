@@ -68,9 +68,9 @@ git clone https://github.com/rebrained-de/Reeinvent-Pitch-Deck-Designer.git
 ### Using the fallback install
 
 1. Open your terminal (Mac: Terminal / Windows: PowerShell).
-2. Go into the folder you just downloaded:
+2. Go into the brand-system folder inside the download:
    ```bash
-   cd ~/Documents/Reeinvent-Brand
+   cd ~/Documents/Reeinvent-Brand/skills/reeinvent-pitch-deck-design
    ```
 3. Start Claude Code:
    ```bash
@@ -104,12 +104,17 @@ Claude knows the full brand system automatically: the 9 canonical colors, the 30
 
 ## What's inside the plugin
 
+The brand-system files live at `skills/reeinvent-pitch-deck-design/` inside the plugin:
+
+- **SKILL.md** - Skill manifest. Claude invokes it automatically when you work on a Reeinvent surface.
+- **CLAUDE.md** - The operating manual for Claude. The 32 non-negotiable rules and the pre-flight checklist.
 - **DESIGN.md** - The complete brand guideline. Every rule Claude follows.
-- **CLAUDE.md** - The operating manual for Claude. Loaded automatically.
-- **SKILL.md** - Skill manifest (invoked automatically when you work on a Reeinvent surface).
 - **reference.md** - Slide archetypes distilled from real Reeinvent presentations.
-- **VERSION** - Semver of the currently installed brand system.
 - **assets/logo/** - The four brand marks, each as SVG (for HTML / web) and PNG at 2x (for PPTX / Slides embedding).
+- **assets/fonts/Roboto/** - Roboto TTFs (Apache 2.0), auto-embedded into every generated `.pptx`.
+- **scripts/embed-fonts.py** - PPTX post-processor that embeds Roboto into output decks.
+
+Distribution metadata at the repo root: `README.md`, `CHANGELOG.md`, `VERSION`, `.claude-plugin/`.
 
 ---
 
