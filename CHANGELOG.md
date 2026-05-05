@@ -6,10 +6,16 @@ The version your install runs is in [VERSION](VERSION). Claude reports it on ses
 
 ---
 
+## v2.2.2 - 2026-05-05
+
+**Client launch cut.** Same brand rules as v2.2.1; this release adds the CHANGELOG and tightens distribution hygiene so the install package is truly plug-and-play.
+
+- Added this CHANGELOG so installs can see release history at a glance.
+- Tightened `.gitignore` to exclude generated decks, slide rasters, `*.bak`, and Python caches - prevents accidental test-artifact commits during workshop work.
+
 ## v2.2.1 - 2026-05-05
 
-**Client launch release.** Repointed everything to the canonical
-`rebrained-de/Reeinvent-Pitch-Deck-Designer` repo and synced the version-drift check, install commands, and marketplace metadata. No brand-rule changes - decks built on v2.2.0 are bit-identical on v2.2.1.
+**Repo rename + URL sync.** Repointed everything to the canonical `rebrained-de/Reeinvent-Pitch-Deck-Designer` repo. No brand-rule changes - decks built on v2.2.0 are bit-identical on v2.2.1.
 
 - Repointed README install commands and the session-start version-check URL in CLAUDE.md / SKILL.md to the new org.
 - Synced `marketplace.json` plugin version to match `VERSION` (was drifting since v2.2.0 shipped).
