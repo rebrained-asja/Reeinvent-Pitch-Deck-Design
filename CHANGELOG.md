@@ -6,6 +6,18 @@ The version your install runs is in [VERSION](VERSION). Claude reports it on ses
 
 ---
 
+## v2.3.1 - 2026-05-05
+
+**Production-ready hardening.** Infrastructure-only patch. No brand-rule changes; decks built on v2.3.0 are bit-identical on v2.3.1.
+
+- Rewrote the manual-install section in `README.md` to use the correct `~/.claude/skills/` copy step. The previous instruction (`cd skills/... && claude`) only auto-loaded `CLAUDE.md` from the cwd; it did not register the skill, so triggers fired only inside that one folder. The new instruction registers the skill globally, matching the plugin install.
+- Softened the README session-start update-check claim to match reality. The check runs at skill activation, not at session start, so a session that never invokes a Reeinvent surface will not trigger it.
+- Added a Recommended companion skills note to `README.md` calling out `anthropic-skills:pptx` and `anthropic-skills:pdf`. The brand system references these skills for `.pptx` / `.pdf` work; they are not bundled here.
+- Added `.github/workflows/ci.yml`. Two jobs run on push and PR: a smoke test that generates a `.pptx`, runs `embed-fonts.py`, and verifies six `fntdata` parts plus reopen plus idempotency; and a lint job that asserts zero em-dash characters anywhere, every SVG hex on the 9-color palette, version sync across `VERSION` / `plugin.json` / `marketplace.json`, every required brand asset present, and plugin manifest names agreeing.
+- Removed dead code from `scripts/embed-fonts.py` (a discarded first-pass zip rewrite that was immediately superseded). Behavior unchanged.
+- Added italic 400 to the Roboto weight allowlist in `SKILL.md` for parity with `CLAUDE.md`. Italic was already permitted (pull quotes only) in `CLAUDE.md` rule 6 and in the pre-flight checklist; the allowlist is now consistent across all three sources of truth.
+- Added Apache 2.0 attribution for the bundled Roboto fonts to `README.md` under a Credits section. License text continues to ship at `assets/fonts/Roboto/LICENSE.txt`.
+
 ## v2.3.0 - 2026-05-05
 
 **Plugin-installable for real.** v2.2.2 advertised plugin install but Claude Desktop returned "Failed to install plugin" on the install handshake - the package was missing `.claude-plugin/plugin.json` (the plugin manifest), and the skill content was at the repo root rather than under `skills/<name>/`. v2.3.0 fixes both.

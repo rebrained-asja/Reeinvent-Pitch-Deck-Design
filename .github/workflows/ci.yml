@@ -1,0 +1,145 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  smoke:
+    name: PPTX font-embed smoke test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install python-pptx
+        run: pip install --quiet python-pptx
+
+      - name: Generate a one-slide PPTX
+        run: |
+          python <<'EOF'
+          from pptx import Presentation
+          p = Presentation()
+          p.slides.add_slide(p.slide_layouts[5]).shapes.title.text = "CI smoke"
+          p.save("ci_smoke.pptx")
+          EOF
+
+      - name: Run embed-fonts.py
+        run: |
+          python skills/reeinvent-pitch-deck-design/scripts/embed-fonts.py \
+            ci_smoke.pptx ci_smoke_embedded.pptx
+
+      - name: Assert 6 fntdata entries
+        run: |
+          count=$(unzip -l ci_smoke_embedded.pptx | grep -c fntdata)
+          echo "fntdata count: $count"
+          test "$count" = "6"
+
+      - name: Assert output reopens cleanly
+        run: |
+          python -c "from pptx import Presentation; p=Presentation('ci_smoke_embedded.pptx'); assert len(p.slides) == 1"
+
+      - name: Assert idempotency on second run
+        run: |
+          python skills/reeinvent-pitch-deck-design/scripts/embed-fonts.py ci_smoke_embedded.pptx
+          count=$(unzip -l ci_smoke_embedded.pptx | grep -c fntdata)
+          echo "fntdata after 2nd run: $count"
+          test "$count" = "6"
+
+      - name: Assert presentation.xml has embeddedFontLst
+        run: |
+          unzip -p ci_smoke_embedded.pptx ppt/presentation.xml | grep -q embeddedFontLst
+
+  lint:
+    name: Brand-system lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: No em-dash characters anywhere (rule 31)
+        shell: bash
+        run: |
+          set -e
+          hits=$(grep -rlP '\x{2014}' \
+            --include='*.md' --include='*.py' --include='*.json' \
+            --include='*.svg' --include='*.yml' --include='*.yaml' \
+            . 2>/dev/null || true)
+          if [ -n "$hits" ]; then
+            echo "FAIL: em-dash (U+2014) found in:"
+            echo "$hits"
+            exit 1
+          fi
+          echo "OK: zero em-dashes"
+
+      - name: SVG assets reference only the 9 canonical hex codes
+        shell: bash
+        run: |
+          set -e
+          allowed='^(0A1220|1B2848|F5F5F5|FFFFFF|2665E2|3C74E2|6C94E5|A942EF|C26DE6|D79BEC)$'
+          fail=0
+          for f in skills/reeinvent-pitch-deck-design/assets/logo/*.svg; do
+            while read -r hex; do
+              up=$(echo "$hex" | tr 'a-f' 'A-F' | tr -d '#')
+              if ! echo "$up" | grep -qE "$allowed"; then
+                echo "FAIL: $f uses non-canonical hex #$up"
+                fail=1
+              fi
+            done < <(grep -oiE '#[0-9a-f]{6}' "$f")
+          done
+          test "$fail" = "0"
+          echo "OK: every SVG hex is on the 9-color palette"
+
+      - name: Version sync (VERSION == plugin.json == marketplace.json)
+        shell: bash
+        run: |
+          set -e
+          v_file=$(tr -d '[:space:]' < VERSION)
+          v_plugin=$(python -c "import json; print(json.load(open('.claude-plugin/plugin.json'))['version'])")
+          v_market=$(python -c "import json; print(json.load(open('.claude-plugin/marketplace.json'))['plugins'][0]['version'])")
+          echo "VERSION=$v_file plugin.json=$v_plugin marketplace.json=$v_market"
+          test "$v_file" = "$v_plugin"
+          test "$v_file" = "$v_market"
+          echo "OK: versions are in sync"
+
+      - name: Required brand assets present
+        shell: bash
+        run: |
+          set -e
+          base=skills/reeinvent-pitch-deck-design/assets
+          required=(
+            "$base/logo/Arrow-Up.svg"          "$base/logo/Arrow-Up@2x.png"
+            "$base/logo/Upwards-Arrow.svg"     "$base/logo/Upwards-Arrow@2x.png"
+            "$base/logo/White-Logo.svg"        "$base/logo/White-Logo@2x.png"
+            "$base/logo/Gradient-Logo.svg"     "$base/logo/Gradient-Logo@2x.png"
+            "$base/fonts/Roboto/Roboto-Light.ttf"
+            "$base/fonts/Roboto/Roboto-Regular.ttf"
+            "$base/fonts/Roboto/Roboto-Italic.ttf"
+            "$base/fonts/Roboto/Roboto-Medium.ttf"
+            "$base/fonts/Roboto/Roboto-Bold.ttf"
+            "$base/fonts/Roboto/Roboto-Black.ttf"
+            "$base/fonts/Roboto/LICENSE.txt"
+          )
+          fail=0
+          for f in "${required[@]}"; do
+            if [ ! -f "$f" ]; then
+              echo "FAIL: missing $f"
+              fail=1
+            fi
+          done
+          test "$fail" = "0"
+          echo "OK: every required brand asset is present"
+
+      - name: Plugin manifest names agree
+        shell: bash
+        run: |
+          set -e
+          mp=$(python -c "import json; print(json.load(open('.claude-plugin/marketplace.json'))['plugins'][0]['name'])")
+          pl=$(python -c "import json; print(json.load(open('.claude-plugin/plugin.json'))['name'])")
+          test "$mp" = "$pl"
+          echo "OK: marketplace.plugins[0].name == plugin.json.name == $mp"
