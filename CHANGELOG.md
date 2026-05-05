@@ -6,6 +6,19 @@ The version your install runs is in [VERSION](VERSION). Claude reports it on ses
 
 ---
 
+## v2.3.2 - 2026-05-05
+
+**Claude Desktop install fix.** v2.3.1 installed cleanly via Claude Code CLI but failed in Claude Desktop. Root cause: the marketplace manifest used a shape that CLI tolerates and Desktop rejects. No brand-rule changes; decks built on v2.3.1 are bit-identical on v2.3.2.
+
+- Aligned `.claude-plugin/marketplace.json` with the canonical shape used by `anthropics/skills` (the only known-working public marketplace reference). Three concrete deltas:
+  - Added an explicit `skills` array on the plugin entry: `["./skills/reeinvent-pitch-deck-design"]`. Without this, Desktop's stricter validator rejects the plugin because it cannot deterministically locate the skill content. CLI auto-discovers and was masking the gap.
+  - Added `"strict": false` on the plugin entry. Matches the reference; relaxes Desktop's schema validation to the same level CLI uses.
+  - Added a top-level `metadata` block with `description` and `version`. Brings the marketplace manifest to schema parity with the reference.
+  - Changed `"source": "."` to `"source": "./"` for trailing-slash parity with the reference.
+- Bumped `VERSION` and `plugin.json` to `2.3.2`. Marketplace `metadata.version` and `plugins[0].version` likewise.
+
+**No brand-rule changes.** This is purely a manifest-shape fix.
+
 ## v2.3.1 - 2026-05-05
 
 **Production-ready hardening.** Infrastructure-only patch. No brand-rule changes; decks built on v2.3.0 are bit-identical on v2.3.1.
