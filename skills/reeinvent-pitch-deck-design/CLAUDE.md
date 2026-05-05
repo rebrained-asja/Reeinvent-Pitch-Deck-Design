@@ -217,11 +217,10 @@ Claude makes these mistakes by default. Pre-empt them.
 ## How to handle common requests
 
 ### "Create a test layout / deck / slide"
-1. Identify the archetype from `reference.md` (A1-A10) or the DESIGN.md template (§6).
-2. Write a JSON spec at `<cwd>/deck.json` using the schema in `SKILL.md`.
-3. Populate with generic placeholders (`Headline`, `Service Name`, `Audience One`).
-4. Run `<skill_root>/bin/reeinvent-deck build <cwd>/deck.json -o <cwd>/deck.pptx`. The generator validates the spec, applies brand rules, embeds Roboto, and verifies before returning.
-5. If the user requests a screenshot review afterwards, walk the deck against the pre-flight checklist below and surface any remaining issue.
+1. Decide Path A or Path B. Default to Path A for any client-facing or external-facing slide.
+2. **Path A**: clone the master via `<skill_root>/bin/reeinvent-clone-master -o ./test.pptx`, inspect, replace text, open. The output uses the master's bespoke layouts and photography.
+3. **Path B (only when explicitly asked for "skeleton" / "rough draft")**: write a JSON spec, run the generator, document the output as "skeleton, not ready for clients."
+4. If the user requests a screenshot review afterwards, walk the deck against the pre-flight checklist below and the master-deck reference (re-inspect a fresh clone if needed).
 
 ### "Add a new rule / change a rule"
 1. Read the existing section in DESIGN.md.
@@ -238,11 +237,12 @@ Claude makes these mistakes by default. Pre-empt them.
 5. Then use it in demos.
 
 ### "Fix a demo"
-1. If the user sent a screenshot, walk through the brand rules in section order and identify each violation.
-2. For each: quote the DESIGN.md rule and the section number.
-3. If the deck was generated, edit the spec or the relevant builder under `generator/reeinvent_pitch_deck/builders/`, then rebuild.
-4. If the deck was authored by hand, make the minimal direct edit.
-5. Re-run the generator's verify step (`bin/reeinvent-deck verify deck.pptx`) before responding "done."
+1. If the user sent a screenshot, identify the master-deck slide it most resembles. Compare deltas (typography scale, photography presence, layout symmetry).
+2. For each delta: quote the DESIGN.md rule OR cite the master-deck slide that contradicts the user's version.
+3. If the deck was Path A: re-inspect, identify the leftover default copy or wrong substitution, run `replace` with the correction.
+4. If the deck was Path B (skeleton): rebuild with corrected spec OR migrate the user to Path A entirely.
+5. If the deck was hand-authored: make the minimal direct edit.
+6. Re-open the deck in PowerPoint for the user to verify.
 
 ### "Export / convert to PPTX or PDF"
 
@@ -270,26 +270,52 @@ If the user needs an archetype the generator does not support, surface that and 
 
 DESIGN.md §12 documents the PPTX-side rules; the generator encodes them. Do not regenerate brand elements by hand.
 
-## The generator (single source of PPTX truth)
+## How to build a Reeinvent PPTX deck
 
-Building a PPTX deck means: write a JSON spec, then run the generator. **Do not hand-roll python-pptx.** The generator at `bin/reeinvent-deck` encodes every brand rule once, applies them deterministically, and verifies the output before returning. Hand-rolled code is how brand violations sneak in.
+Two paths. **Default to Path A for any client-facing deck.** Path B is for skeletons.
+
+### Path A (canonical, premium): clone the production master and edit text
+
+The Reeinvent design team maintains the master at `~/Reeinvent/Templates/REE 2.0 - Master Company Presentation.pptx`. It carries real photography, custom mockup clusters, partner-alliance accents, and bespoke typography decisions no algorithm replicates.
+
+```bash
+# 1. Clone the master into the user's cwd (auto-locates, opens in PowerPoint)
+<skill_root>/bin/reeinvent-clone-master -o ./<prospect>.pptx
+
+# 2. List every text shape on every slide so you can plan replacements
+<skill_root>/bin/reeinvent-deck inspect ./<prospect>.pptx
+
+# 3. Build a {old: new} JSON map matching strings VERBATIM from inspect output
+#    (curly apostrophes, newlines, all preserved). Show the map to the user
+#    before applying.
+
+# 4. Apply text replacements (preserves layout, photos, gradients, fonts)
+<skill_root>/bin/reeinvent-deck replace ./<prospect>.pptx /tmp/replacements.json
+
+# 5. Re-inspect to confirm every replacement landed and find leftover defaults
+
+# 6. Tell the user which slides to delete in PowerPoint (right-click -> Delete)
+#    for slides that do not apply. Do NOT delete slides via python-pptx.
+```
+
+What text replacement preserves: layout, photos, gradients, theme colors, run-level typography, speaker notes, embedded fonts. What it does NOT cover: photography swaps (tell user to use PowerPoint's "Change Picture"), adding new slides (PowerPoint's "Duplicate Slide"), or layout changes (PowerPoint manual edit).
+
+### Path B (skeleton mode): generate a brand-correct draft from JSON
+
+For internal drafts, throwaway demos, or when the user explicitly asks for "skeleton" or "rough draft":
 
 ```bash
 <skill_root>/bin/reeinvent-deck build deck.json -o deck.pptx
 ```
 
-The wrapper auto-creates a Python venv on first run. No pip install, no manual setup. Subsequent runs reuse it. If `requirements.txt` changes, the venv rebuilds automatically.
-
-Spec schema and archetype list: see `SKILL.md` "Spec format". Reference example: `generator/examples/reeinvent-full.json`.
+The generator produces brand-correct primitives (theme colors, fonts, gradients, native shapes) but NOT the master's premium visual quality. **Do not ship Path B output to a paying client without running it through Path A polish.** Skeleton-mode spec format is in `generator/reeinvent_pitch_deck/spec.py`; reference example at `generator/examples/reeinvent-full.json`.
 
 ### Workflow phases (named for shared vocabulary)
 
-These are not separate tools or skills, just the named phases of the work. Reference them when you describe what you are doing.
-
-- **normalize** - check the spec or output against DESIGN.md before saving. The generator's spec validator and post-build verify already enforce most of this; if you spot a remaining gap, fix the relevant builder.
-- **critique** - structured design feedback when the user sends a screenshot or says something is off. Identify the DESIGN.md rule the rendering violates, quote it, propose the minimal fix.
-- **polish** - pre-ship pass for alignment, spacing, type-scale adherence. The generator handles most of this; the residual is content (placeholder text quality, archetype choice).
-- **audit** - accessibility / WCAG / contrast check before a deck ships externally.
+- **normalize** - check the deck against DESIGN.md before saving.
+- **critique** - structured design feedback on a screenshot. Identify the master-deck slide it should match, name the deltas.
+- **polish** - pre-ship pass for alignment, spacing, photography. For Path A this is mostly: did Claude leave any default master copy that should have been replaced?
+- **audit** - accessibility / WCAG / contrast check before external distribution.
 
 ## Pre-flight checklist (run before saying "done")
 

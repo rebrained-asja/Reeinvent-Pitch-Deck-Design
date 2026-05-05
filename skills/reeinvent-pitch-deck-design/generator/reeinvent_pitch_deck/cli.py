@@ -75,11 +75,43 @@ def _cmd_embed(args) -> int:
     return 0
 
 
+def _cmd_inspect(args) -> int:
+    from reeinvent_pitch_deck.inspect import inspect_deck
+    import json as _json
+    deck = inspect_deck(Path(args.deck))
+    if args.json:
+        print(_json.dumps(deck, indent=2, ensure_ascii=False))
+    else:
+        for s in deck:
+            print(f"=== Slide {s['index']} (layout: {s['layout']}) ===")
+            for shape in s["shapes"]:
+                snippet = shape["text"][:140]
+                print(f"  [{shape['name']}] {snippet}")
+            print()
+    return 0
+
+
+def _cmd_replace(args) -> int:
+    from reeinvent_pitch_deck.inspect import replace_text_in_deck
+    import json as _json
+    raw = _json.loads(Path(args.replacements).read_text())
+    if not isinstance(raw, dict):
+        print("reeinvent-deck: replacements file must be a JSON object {old: new}", file=sys.stderr)
+        return 1
+    only = None
+    if args.slides:
+        only = {int(x) for x in args.slides.split(",")}
+    out = Path(args.output) if args.output else Path(args.deck)
+    count = replace_text_in_deck(Path(args.deck), out, raw, only_slides=only)
+    print(f"reeinvent-deck: {count} replacements made -> {out}")
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     p = argparse.ArgumentParser(prog="reeinvent-deck", description=__doc__)
     sub = p.add_subparsers(dest="command", required=True)
 
-    pb = sub.add_parser("build", help="Build a .pptx from a JSON spec")
+    pb = sub.add_parser("build", help="[skeleton mode] Build a .pptx from a JSON spec via the generator")
     pb.add_argument("spec", help="path to the JSON spec file")
     pb.add_argument("-o", "--output", help="output .pptx path (default: spec basename with .pptx)")
     pb.add_argument("--skip-font-embed", action="store_true", help="skip the Roboto post-embed step (test use only)")
@@ -95,6 +127,18 @@ def main(argv: list[str] | None = None) -> int:
     pe.add_argument("deck", help="path to the .pptx")
     pe.add_argument("-o", "--output", help="output path (default: replace input in place)")
     pe.set_defaults(func=_cmd_embed)
+
+    pi = sub.add_parser("inspect", help="List every slide + its text content (template-edit planning)")
+    pi.add_argument("deck", help="path to the .pptx")
+    pi.add_argument("--json", action="store_true", help="output JSON")
+    pi.set_defaults(func=_cmd_inspect)
+
+    pr = sub.add_parser("replace", help="Apply {old: new} text replacements across a cloned master deck")
+    pr.add_argument("deck", help="path to the .pptx")
+    pr.add_argument("replacements", help="JSON file mapping old strings to new strings")
+    pr.add_argument("-o", "--output", help="output path (default: replace input in place)")
+    pr.add_argument("--slides", help="restrict to comma-separated 1-based slide indices")
+    pr.set_defaults(func=_cmd_replace)
 
     args = p.parse_args(argv)
     return args.func(args)

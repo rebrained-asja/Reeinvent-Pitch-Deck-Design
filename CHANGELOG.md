@@ -6,6 +6,32 @@ The version your install runs is in [VERSION](VERSION). Claude reports it on ses
 
 ---
 
+## v3.1.0 - 2026-05-05
+
+**Path A (clone the master deck) is now the canonical workflow.** v3.0.0 shipped a code-driven generator as the way to produce client decks, then sales-deck testing in real PowerPoint exposed a fundamental mismatch: the production Reeinvent master deck has design moves a generator cannot replicate without a designer in the loop (mega-display "AI-DRIVEN" titles at 180+ pt with full-bleed gradient text, laptop+screenshot mockup clusters layered over tinted product photography, partner-brand alliance accents on the Trident slide, multiple gradient underlines per slide). v3.0.0's generator produced brand-correct skeletons but not Reeinvent-quality output. Path A inverts the model: clone the actual master deck (where every slide is already designer-perfect) and have Claude swap only the text per prospect.
+
+**What's new**
+
+- `bin/reeinvent-clone-master`: locates the production master via env-var / `~/Reeinvent/Templates/` / `~/Documents/Reeinvent/` / `~/Downloads/` (in priority order), copies it to a working file in cwd, opens in PowerPoint. Variants supported: `master`, `slim`, `two-pager`.
+- `bin/reeinvent-deck inspect <deck.pptx>`: lists every slide with its layout name and the text content of every shape. Used to plan replacements before mutating.
+- `bin/reeinvent-deck replace <deck.pptx> <replacements.json>`: applies `{old: new}` text substitutions across the deck while preserving every shape's geometry, fonts, gradients, photography, and run-level typography. Restrict to specific slides via `--slides 1,2,4`.
+- `templates/README.md`: documents the master-deck install location and discovery order.
+
+**SKILL.md / CLAUDE.md / README rewrites**
+
+- SKILL.md frames the two-path workflow with Path A as default for client work and Path B (skeleton generator) gated behind explicit "draft" / "rough cut" requests.
+- CLAUDE.md no longer instructs Claude to write JSON specs for client decks; it instructs Claude to clone the master, inspect, replace, re-inspect.
+- README documents first-time master-deck install (`mkdir -p ~/Reeinvent/Templates && mv ...`) prominently.
+- DESIGN.md left intact but with an explicit caveat in SKILL.md: the master deck is the source of truth; DESIGN.md prose is a simplified summary that does not capture every brand pattern. The master allows multiple gradient underlines per slide (DESIGN.md says one), partner-brand colors on alliance slides (DESIGN.md says nine canonical only), and a full button library (DESIGN.md says no button library exists).
+
+**What's preserved from v3.0.0**
+
+The Path B generator (`bin/reeinvent-deck build`), 12 archetype builders, theme XML patching, font embedding, post-build verification, 20 tests, and CI all stay. They keep working for skeleton-mode use. The v3.0.0 release notes' premium claims are superseded; the generator remains useful for fast internal first-drafts and any context where the master deck is unavailable.
+
+**Migration**
+
+Re-install: `/plugin update reeinvent-pitch-deck-design@reeinvent-brand-system`. Then drop your master into `~/Reeinvent/Templates/` per the README. The v3.0.0 JSON spec workflow continues to work but should not be used for client decks.
+
 ## v3.0.0 - 2026-05-05
 
 **Deterministic PPTX generator. End of hand-rolled python-pptx.** v2.x shipped the brand law, assets, and a font-embed post-processor, but every PPTX request asked Claude to write python-pptx code from scratch while remembering 32 brand rules. The result was non-deterministic output that drifted between sessions: theme colors sometimes missing, gradient text sometimes solid Core Blue, autofit sometimes wrong, embed sometimes skipped. v3.0.0 replaces that with a code-driven pipeline that encodes every rule once and outputs production-grade decks.

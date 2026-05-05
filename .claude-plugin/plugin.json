@@ -1,7 +1,7 @@
 {
   "name": "reeinvent-pitch-deck-design",
-  "version": "3.0.0",
-  "description": "Reeinvent brand system + deterministic PPTX generator. Produces brand-perfect editable decks (theme colors, embedded Roboto, native shapes, gradient text on stat numbers) from a JSON spec via one command. Also enforces brand rules on any HTML / PPTX / PDF surface.",
+  "version": "3.1.0",
+  "description": "Reeinvent brand system + premium deck workflow. Path A clones the production master and Claude swaps text per prospect (default for client work). Path B is a JSON-spec generator for fast internal skeletons. Also enforces brand rules on any HTML / PPTX / PDF surface.",
   "author": {
     "name": "Reeinvent"
   },

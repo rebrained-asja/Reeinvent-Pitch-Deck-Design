@@ -5,7 +5,7 @@
   },
   "metadata": {
     "description": "Reeinvent brand system + PPTX generator. One plugin: reeinvent-pitch-deck-design.",
-    "version": "3.0.0"
+    "version": "3.1.0"
   },
   "plugins": [
     {
@@ -13,7 +13,7 @@
       "description": "Reeinvent brand system + deterministic PPTX generator. Builds brand-perfect editable decks from a JSON spec; enforces brand rules on every HTML / PPTX / PDF surface.",
       "source": "./",
       "strict": false,
-      "version": "3.0.0",
+      "version": "3.1.0",
       "skills": [
         "./skills/reeinvent-pitch-deck-design"
       ]
