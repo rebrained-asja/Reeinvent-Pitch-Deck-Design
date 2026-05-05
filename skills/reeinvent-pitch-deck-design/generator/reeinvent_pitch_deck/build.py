@@ -7,7 +7,11 @@ from pathlib import Path
 from pptx import Presentation
 
 from reeinvent_pitch_deck.embed import embed_fonts
-from reeinvent_pitch_deck.master import add_blank_slide, new_branded_presentation
+from reeinvent_pitch_deck.master import (
+    add_blank_slide,
+    finalize_branded_presentation,
+    new_branded_presentation,
+)
 from reeinvent_pitch_deck.spec import DeckSpec, SlideSpec
 
 from reeinvent_pitch_deck.builders import (
@@ -64,6 +68,11 @@ def build_deck(deck: DeckSpec, output_path: Path, *, skip_font_embed: bool = Fal
         notes_text = slide_spec.get("notes")
         if notes_text:
             slide.notes_slide.notes_text_frame.text = notes_text
+
+    # Patch every theme part (slide master, notes master, handout master if
+    # present) AFTER all slides built so lazily-created notes themes get
+    # the brand color scheme.
+    finalize_branded_presentation(prs)
 
     output = Path(output_path)
     output.parent.mkdir(parents=True, exist_ok=True)

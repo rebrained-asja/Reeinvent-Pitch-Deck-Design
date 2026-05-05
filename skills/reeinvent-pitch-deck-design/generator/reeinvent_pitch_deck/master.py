@@ -103,35 +103,59 @@ def _replace_font_scheme(theme_root: etree._Element) -> None:
 
 
 def _patch_master_theme(prs: Presentation) -> None:
-    """Apply Reeinvent color + font scheme to every slide master in the deck."""
-    for master in prs.slide_masters:
-        # The theme XML lives at master.element.theme; access via the part
-        # relationships.
-        theme_part = None
-        for rel in master.part.rels.values():
-            if rel.reltype.endswith("/theme"):
-                theme_part = rel.target_part
-                break
-        if theme_part is None:
+    """Apply Reeinvent color + font scheme to EVERY theme part in the package.
+
+    A presentation has multiple theme parts: one for the main slide master
+    (theme1.xml, a base Part with `_blob` as source of truth), one for the
+    notes master (theme2.xml, an XmlPart with `_element` as source of truth),
+    plus the handout master if present. The two part classes differ in how
+    you mutate them, so this handles both.
+    """
+    from pptx.opc.package import XmlPart  # imported lazily to avoid cycles
+
+    seen: set[str] = set()
+    for part in prs.part.package.iter_parts():
+        partname = str(getattr(part, "partname", ""))
+        if not partname.startswith("/ppt/theme/") or not partname.endswith(".xml"):
             continue
-        theme_root = etree.fromstring(theme_part.blob)
-        _replace_color_scheme(theme_root)
-        _replace_font_scheme(theme_root)
-        theme_part._blob = etree.tostring(theme_root, xml_declaration=True, encoding="UTF-8")
+        if partname in seen:
+            continue
+        seen.add(partname)
+
+        # Source of truth differs by part class.
+        if isinstance(part, XmlPart):
+            theme_root = part._element
+            _replace_color_scheme(theme_root)
+            _replace_font_scheme(theme_root)
+            # XmlPart serializes _element on read; mutating in place is enough.
+        else:
+            theme_root = etree.fromstring(part.blob)
+            _replace_color_scheme(theme_root)
+            _replace_font_scheme(theme_root)
+            part._blob = etree.tostring(
+                theme_root, xml_declaration=True, encoding="UTF-8"
+            )
 
 
 def new_branded_presentation() -> Presentation:
-    """Return a fresh Presentation with brand theme colors, Roboto theme fonts,
-    and the canvas set to 16:9 widescreen (13.333 in x 7.5 in).
+    """Return a fresh Presentation with the canvas set to 16:9 widescreen.
+
+    Theme patching happens later via finalize_branded_presentation() because
+    the notes master + its theme are created lazily when speaker notes are
+    first added; patching upfront would miss them.
     """
     prs = Presentation()
-    # Use exact EMU values for 16:9 widescreen so the canvas matches what
-    # PowerPoint's "Widescreen" preset writes (13.333... in repeats; rounding
-    # to inches drifts off by a hair).
     prs.slide_width = Emu(12192000)
     prs.slide_height = Emu(6858000)
-    _patch_master_theme(prs)
     return prs
+
+
+def finalize_branded_presentation(prs: Presentation) -> None:
+    """Apply Reeinvent theme to every theme part in the package. Call this
+    AFTER all slides have been added so any lazy-created masters (notes,
+    handout) get their theme patched too.
+    """
+    _patch_master_theme(prs)
 
 
 BLANK_LAYOUT_INDEX = 6  # python-pptx default master ships layouts 0..10; index 6 is "Blank"

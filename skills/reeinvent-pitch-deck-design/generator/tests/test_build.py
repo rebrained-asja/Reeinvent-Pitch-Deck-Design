@@ -123,3 +123,34 @@ def test_canvas_is_widescreen(minimal_pptx):
         body = z.read("ppt/presentation.xml").decode("utf-8")
     assert 'cx="12192000"' in body
     assert 'cy="6858000"' in body
+
+
+def test_speaker_notes_brand_theme(tmp_path):
+    """Notes-master theme (theme2.xml) is created lazily when speaker notes
+    are first added. The brand theme MUST propagate to it; otherwise the
+    notes pane shows Office default colors and a re-skin breaks half the deck.
+    Regression for the bug found during the v3.0.0 sales-deck test run.
+    """
+    from reeinvent_pitch_deck.build import build_deck
+    from reeinvent_pitch_deck.spec import parse_spec
+
+    deck = parse_spec({
+        "title": "Notes regression",
+        "slides": [
+            {
+                "archetype": "cover",
+                "title": "With notes",
+                "notes": "These notes force the notes-master theme to instantiate.",
+            }
+        ],
+    })
+    out = tmp_path / "notes.pptx"
+    build_deck(deck, out)
+
+    with zipfile.ZipFile(out) as z:
+        theme_files = [n for n in z.namelist() if n.startswith("ppt/theme/") and n.endswith(".xml")]
+        assert len(theme_files) >= 2, f"expected theme1 + theme2 (notes); got {theme_files}"
+        for tf in theme_files:
+            body = z.read(tf).decode("utf-8").upper()
+            for hex_val in ("0A1220", "1B2848", "2665E2", "C26DE6", "D79BEC"):
+                assert hex_val in body, f"{tf} missing brand color #{hex_val}"
