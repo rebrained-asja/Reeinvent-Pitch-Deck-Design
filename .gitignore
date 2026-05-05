@@ -1,2 +1,16 @@
+# OS / editor cruft
 .DS_Store
 .claude/settings.local.json
+
+# Generated / test artifacts (decks live in the working directory, not the repo)
+*.pptx
+*.pdf
+*.bak
+slide-*.jpg
+slide-*.png
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
