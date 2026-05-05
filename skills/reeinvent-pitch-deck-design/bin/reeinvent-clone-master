@@ -1,0 +1,147 @@
+#!/usr/bin/env bash
+# reeinvent-clone-master: copy the production master deck to a working file.
+#
+# Locates the master deck via the discovery order documented in
+# templates/README.md (env var, ~/Reeinvent/Templates, ~/Documents/Reeinvent,
+# ~/Downloads fallback). Copies it to the destination path. Optionally opens
+# the copy in PowerPoint.
+#
+# Usage:
+#   reeinvent-clone-master [-o OUTPUT.pptx] [--variant master|slim|two-pager] [--no-open]
+#
+# Defaults: OUTPUT = ./reeinvent-deck-YYYYMMDD-HHMMSS.pptx
+#           variant = master
+#           opens the file in PowerPoint after copying
+#
+# Exit codes:
+#   0 - copy succeeded
+#   1 - master deck not found at any expected location
+#   2 - destination already exists and --force was not given
+
+set -euo pipefail
+
+OUTPUT=""
+VARIANT="master"
+NO_OPEN="false"
+FORCE="false"
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -o|--output) OUTPUT="$2"; shift 2 ;;
+    --variant) VARIANT="$2"; shift 2 ;;
+    --no-open) NO_OPEN="true"; shift ;;
+    --force) FORCE="true"; shift ;;
+    -h|--help)
+      sed -n '1,30p' "$0" | grep '^#' | sed 's/^# \{0,1\}//'
+      exit 0 ;;
+    *) echo "reeinvent-clone-master: unknown arg: $1" >&2; exit 1 ;;
+  esac
+done
+
+# Pattern per variant. Matches the canonical full filenames Asja ships.
+# We exclude "(Part N)" multi-file splits and "(Variation N)" experimental
+# cuts so the helper picks the canonical master.
+case "$VARIANT" in
+  master)    FILE_PATTERN="REE 2.0*Master*Presentation.pptx" ;;
+  slim)      FILE_PATTERN="REE 2.0*Slim*Presentation.pptx" ;;
+  two-pager) FILE_PATTERN="REE 2.0*Two-Pager*Presentation.pptx" ;;
+  *) echo "reeinvent-clone-master: unknown variant: $VARIANT (expected master|slim|two-pager)" >&2; exit 1 ;;
+esac
+
+# Discovery order.
+master_path=""
+
+# 1. REEINVENT_MASTER_DECK env var (only honored when variant=master).
+if [[ -n "${REEINVENT_MASTER_DECK:-}" && "$VARIANT" == "master" ]]; then
+  if [[ -f "$REEINVENT_MASTER_DECK" ]]; then
+    master_path="$REEINVENT_MASTER_DECK"
+  fi
+fi
+
+# 2. REEINVENT_TEMPLATES_DIR env var.
+if [[ -z "$master_path" && -n "${REEINVENT_TEMPLATES_DIR:-}" ]]; then
+  found=$(find "$REEINVENT_TEMPLATES_DIR" -maxdepth 2 -iname "$FILE_PATTERN" 2>/dev/null | head -n 1)
+  if [[ -n "$found" ]]; then
+    master_path="$found"
+  fi
+fi
+
+# 3. ~/Reeinvent/Templates/
+if [[ -z "$master_path" && -d "$HOME/Reeinvent/Templates" ]]; then
+  found=$(find "$HOME/Reeinvent/Templates" -maxdepth 2 -iname "$FILE_PATTERN" 2>/dev/null | head -n 1)
+  if [[ -n "$found" ]]; then
+    master_path="$found"
+  fi
+fi
+
+# 4. ~/Documents/Reeinvent/Templates/ and ~/Documents/Reeinvent/
+if [[ -z "$master_path" ]]; then
+  for dir in "$HOME/Documents/Reeinvent/Templates" "$HOME/Documents/Reeinvent"; do
+    if [[ -d "$dir" ]]; then
+      found=$(find "$dir" -maxdepth 2 -iname "$FILE_PATTERN" 2>/dev/null | head -n 1)
+      if [[ -n "$found" ]]; then
+        master_path="$found"
+        break
+      fi
+    fi
+  done
+fi
+
+# 5. ~/Downloads/ fallback (latest by mtime if multiple).
+if [[ -z "$master_path" && -d "$HOME/Downloads" ]]; then
+  master_path=$(find "$HOME/Downloads" -maxdepth 1 -iname "$FILE_PATTERN" -print0 2>/dev/null \
+    | xargs -0 -I {} stat -f "%m %N" {} 2>/dev/null \
+    | sort -rn | head -n 1 | cut -d' ' -f2-)
+fi
+
+if [[ -z "$master_path" || ! -f "$master_path" ]]; then
+  cat >&2 <<EOF
+reeinvent-clone-master: master deck not found.
+
+Looked for files matching: $FILE_PATTERN
+
+Searched (in order):
+  1. \$REEINVENT_MASTER_DECK env var
+  2. \$REEINVENT_TEMPLATES_DIR env var
+  3. ~/Reeinvent/Templates/
+  4. ~/Documents/Reeinvent/Templates/
+  5. ~/Downloads/
+
+To fix, install the master deck once:
+  mkdir -p ~/Reeinvent/Templates
+  cp /path/to/REE\ 2.0*Master*Presentation*.pptx ~/Reeinvent/Templates/
+
+Or set REEINVENT_MASTER_DECK to the full path of your master file.
+EOF
+  exit 1
+fi
+
+# Default output path.
+if [[ -z "$OUTPUT" ]]; then
+  ts=$(date +%Y%m%d-%H%M%S)
+  OUTPUT="$(pwd)/reeinvent-deck-${ts}.pptx"
+fi
+
+# Don't clobber unless --force.
+if [[ -e "$OUTPUT" && "$FORCE" != "true" ]]; then
+  echo "reeinvent-clone-master: $OUTPUT already exists; pass --force to overwrite." >&2
+  exit 2
+fi
+
+# Copy.
+cp -p "$master_path" "$OUTPUT"
+size=$(du -h "$OUTPUT" | cut -f1)
+echo "reeinvent-clone-master: cloned $(basename "$master_path") -> $OUTPUT ($size)"
+
+# Open in PowerPoint by default.
+if [[ "$NO_OPEN" != "true" ]]; then
+  if [[ -d "/Applications/Microsoft PowerPoint.app" ]]; then
+    open -a "Microsoft PowerPoint" "$OUTPUT"
+    echo "reeinvent-clone-master: opened in PowerPoint."
+  else
+    echo "reeinvent-clone-master: PowerPoint not installed; skipping open." >&2
+  fi
+fi
+
+echo
+echo "next: edit text via the clone-and-edit workflow in SKILL.md."

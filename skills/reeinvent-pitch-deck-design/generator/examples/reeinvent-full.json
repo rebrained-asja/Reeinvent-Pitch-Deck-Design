@@ -1,0 +1,120 @@
+{
+  "title": "Reeinvent Full Example Deck",
+  "author": "Reeinvent",
+  "date": "2026-05-05",
+  "slides": [
+    {
+      "archetype": "cover",
+      "background": "ink",
+      "eyebrow": "AI-FIRST ENGINEERING PARTNER",
+      "title": "From ideas to scalable AI solutions in weeks.",
+      "highlight_words": ["in weeks"],
+      "subtitle": "We help companies identify where AI creates value and build the solutions to deliver it."
+    },
+    {
+      "archetype": "intro_split",
+      "split_top": "Who we",
+      "split_bottom": "Are",
+      "headline": "Your AI-driven software company",
+      "highlight_words": ["AI-driven", "software"],
+      "body": "We help companies identify where AI creates real value and build the solutions to deliver it.",
+      "image_note": "[INSERT TEAM PHOTO]"
+    },
+    {
+      "archetype": "agenda",
+      "items": [
+        {"title": "Why now", "description": "The cost curve flipped this year."},
+        {"title": "How we ship", "description": "From first conversation to a system in weeks."},
+        {"title": "What we build", "description": "Concept sprints, prototypes, custom apps, scaling."},
+        {"title": "Proof points", "description": "Three case studies, three industries."},
+        {"title": "Let's build", "description": "Booking the first conversation."}
+      ]
+    },
+    {
+      "archetype": "section_divider",
+      "section_label": "SECTION 01 / 03",
+      "title": "How we ship in weeks",
+      "description": "From first conversation to a system your users can touch."
+    },
+    {
+      "archetype": "stat",
+      "number": "6 wk",
+      "label": "AVG. IDEA TO PROD",
+      "supporting": "From first conversation to a system your users can touch."
+    },
+    {
+      "archetype": "three_up",
+      "eyebrow": "WHAT WE BUILD",
+      "title": "Services that take you from idea to scale.",
+      "highlight_words": ["idea to scale"],
+      "cards": [
+        {"title": "Concept Sprint", "body": "Refine the concept into a testable prototype in under a week."},
+        {"title": "Rapid Prototype", "body": "Proof of value you can test, demo, or pitch."},
+        {"title": "Custom Apps", "body": "Production AI features wired into your stack."}
+      ]
+    },
+    {
+      "archetype": "two_column",
+      "eyebrow": "OUR APPROACH",
+      "title": "Tight loops, real users.",
+      "left_body": "Every engagement starts with a single sharp question and ends with a system the team can run. No long discoveries, no abstract slides; live software in week one.",
+      "right_body": "We measure success by what gets shipped, not what gets specified. The team you meet on day one is the team that codes through to launch."
+    },
+    {
+      "archetype": "service_detail",
+      "category": "AI-DRIVEN PROTOTYPING",
+      "duration": "1-3 weeks",
+      "service_top": "Concept",
+      "service_bottom": "Sprint",
+      "chat_bubble": "Concept refined into a testable prototype",
+      "tagline": "Turn ideas into testable AI concepts fast.",
+      "included": [
+        "Problem framing workshop",
+        "Concept doc + technical fit",
+        "Working prototype with live data",
+        "Stakeholder demo + handoff"
+      ],
+      "url": "reeinvent.com/concept-sprint"
+    },
+    {
+      "archetype": "success_story",
+      "client_name": "Alva",
+      "client_color": "core_blue",
+      "chat_bubble": "Long-term agentic innovation platform",
+      "challenge": "Internal teams could not access the right knowledge fast enough across 10+ disconnected systems.",
+      "solution": "Agentic search layer that learns each team's intent and pulls the right answer from any source.",
+      "results": [
+        "+20% faster knowledge access",
+        "10+ systems unified",
+        "92% task acceptance rate",
+        "Sub-second responses"
+      ]
+    },
+    {
+      "archetype": "quote",
+      "background": "deep_navy",
+      "quote": "They built in three weeks what our last vendor scoped for nine months.",
+      "attribution_name": "Marko Petrovic",
+      "attribution_role": "CTO, Northwind"
+    },
+    {
+      "archetype": "content",
+      "background": "off_white",
+      "eyebrow": "WHY US",
+      "title": "Built by engineers who ship.",
+      "highlight_words": ["ship"],
+      "bullets": [
+        "Senior engineers, no offshoring",
+        "Working software week one",
+        "Brand-aware design system",
+        "Production-grade by default",
+        "Long-term partnership model"
+      ]
+    },
+    {
+      "archetype": "closing",
+      "message": "Let's build it.",
+      "cta_label": "Book a call"
+    }
+  ]
+}

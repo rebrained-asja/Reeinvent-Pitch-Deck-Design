@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "reeinvent_pitch_deck"
+version = "3.1.0"
+description = "Deterministic, brand-perfect Reeinvent pitch-deck generator. Takes a JSON spec, produces a fully-editable .pptx with theme colors, embedded fonts, and brand-correct shapes."
+requires-python = ">=3.10"
+dependencies = ["python-pptx==1.0.2"]
+
+[project.scripts]
+reeinvent-deck = "reeinvent_pitch_deck.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["reeinvent_pitch_deck*"]
+
+[tool.setuptools.package-data]
+reeinvent_pitch_deck = ["py.typed"]

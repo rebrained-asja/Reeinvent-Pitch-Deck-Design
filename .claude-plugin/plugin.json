@@ -1,7 +1,7 @@
 {
   "name": "reeinvent-pitch-deck-design",
-  "version": "2.4.0",
-  "description": "Reeinvent brand system and design rules for pitch decks, slides, covers, section dividers, service layouts, and any HTML / PPTX / PDF surface that ships under the Reeinvent brand.",
+  "version": "3.1.0",
+  "description": "Reeinvent brand system + premium deck workflow. Path A clones the production master and Claude swaps text per prospect (default for client work). Path B is a JSON-spec generator for fast internal skeletons. Also enforces brand rules on any HTML / PPTX / PDF surface.",
   "author": {
     "name": "Reeinvent"
   },

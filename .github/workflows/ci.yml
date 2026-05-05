@@ -7,8 +7,8 @@ on:
     branches: [main]
 
 jobs:
-  smoke:
-    name: PPTX font-embed smoke test
+  generator:
+    name: Generator end-to-end + brand pre-flight
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -18,43 +18,53 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Install python-pptx
-        run: pip install --quiet python-pptx
-
-      - name: Generate a one-slide PPTX
+      - name: Install generator (editable + test deps)
         run: |
-          python <<'EOF'
-          from pptx import Presentation
-          p = Presentation()
-          p.slides.add_slide(p.slide_layouts[5]).shapes.title.text = "CI smoke"
-          p.save("ci_smoke.pptx")
-          EOF
+          pip install --quiet -e skills/reeinvent-pitch-deck-design/generator
+          pip install --quiet pytest
 
-      - name: Run embed-fonts.py
-        run: |
-          python skills/reeinvent-pitch-deck-design/scripts/embed-fonts.py \
-            ci_smoke.pptx ci_smoke_embedded.pptx
+      - name: Run generator unit + integration tests
+        run: pytest skills/reeinvent-pitch-deck-design/generator/tests/ -v
 
-      - name: Assert 6 fntdata entries
+      - name: Build the full reference deck via the CLI
         run: |
-          count=$(unzip -l ci_smoke_embedded.pptx | grep -c fntdata)
-          echo "fntdata count: $count"
-          test "$count" = "6"
+          python -m reeinvent_pitch_deck build \
+            skills/reeinvent-pitch-deck-design/generator/examples/reeinvent-full.json \
+            -o reeinvent-full.pptx
 
-      - name: Assert output reopens cleanly
-        run: |
-          python -c "from pptx import Presentation; p=Presentation('ci_smoke_embedded.pptx'); assert len(p.slides) == 1"
+      - name: Verify the built deck
+        run: python -m reeinvent_pitch_deck verify reeinvent-full.pptx
 
-      - name: Assert idempotency on second run
+      - name: Assert 6 fntdata entries (font embedding)
         run: |
-          python skills/reeinvent-pitch-deck-design/scripts/embed-fonts.py ci_smoke_embedded.pptx
-          count=$(unzip -l ci_smoke_embedded.pptx | grep -c fntdata)
-          echo "fntdata after 2nd run: $count"
+          count=$(unzip -l reeinvent-full.pptx | grep -c fntdata)
           test "$count" = "6"
 
       - name: Assert presentation.xml has embeddedFontLst
         run: |
-          unzip -p ci_smoke_embedded.pptx ppt/presentation.xml | grep -q embeddedFontLst
+          unzip -p reeinvent-full.pptx ppt/presentation.xml | grep -q embeddedFontLst
+
+      - name: Assert no spAutoFit in any slide
+        run: |
+          count=$(unzip -p reeinvent-full.pptx 'ppt/slides/*.xml' | grep -c spAutoFit || true)
+          test "$count" = "0"
+
+      - name: Bootstrap script - clean install path
+        run: |
+          rm -rf skills/reeinvent-pitch-deck-design/.venv
+          skills/reeinvent-pitch-deck-design/bin/reeinvent-deck build \
+            skills/reeinvent-pitch-deck-design/generator/examples/minimal.json \
+            -o /tmp/minimal-bootstrap.pptx
+
+      - name: Bootstrap script - idempotent reuse
+        run: |
+          # Second invocation should NOT recreate the venv. Capture and check.
+          out=$(skills/reeinvent-pitch-deck-design/bin/reeinvent-deck verify /tmp/minimal-bootstrap.pptx 2>&1)
+          echo "$out"
+          if echo "$out" | grep -q "setting up Python environment"; then
+            echo "FAIL: bootstrap re-ran setup on second invocation"
+            exit 1
+          fi
 
   lint:
     name: Brand-system lint
@@ -69,6 +79,7 @@ jobs:
           hits=$(grep -rlP '\x{2014}' \
             --include='*.md' --include='*.py' --include='*.json' \
             --include='*.svg' --include='*.yml' --include='*.yaml' \
+            --exclude-dir='.venv' \
             . 2>/dev/null || true)
           if [ -n "$hits" ]; then
             echo "FAIL: em-dash (U+2014) found in:"
@@ -95,17 +106,19 @@ jobs:
           test "$fail" = "0"
           echo "OK: every SVG hex is on the 9-color palette"
 
-      - name: Version sync (VERSION == plugin.json == marketplace.json)
+      - name: Version sync (VERSION == plugin.json == marketplace.json == pyproject.toml)
         shell: bash
         run: |
           set -e
           v_file=$(tr -d '[:space:]' < VERSION)
           v_plugin=$(python -c "import json; print(json.load(open('.claude-plugin/plugin.json'))['version'])")
           v_market=$(python -c "import json; print(json.load(open('.claude-plugin/marketplace.json'))['plugins'][0]['version'])")
-          echo "VERSION=$v_file plugin.json=$v_plugin marketplace.json=$v_market"
+          v_pkg=$(grep '^version' skills/reeinvent-pitch-deck-design/generator/pyproject.toml | head -1 | sed 's/.*"\(.*\)".*/\1/')
+          echo "VERSION=$v_file plugin.json=$v_plugin marketplace.json=$v_market pyproject.toml=$v_pkg"
           test "$v_file" = "$v_plugin"
           test "$v_file" = "$v_market"
-          echo "OK: versions are in sync"
+          test "$v_file" = "$v_pkg"
+          echo "OK: versions are in sync across all four files"
 
       - name: Required brand assets present
         shell: bash
@@ -144,32 +157,30 @@ jobs:
           test "$mp" = "$pl"
           echo "OK: marketplace.plugins[0].name == plugin.json.name == $mp"
 
-      - name: Marketplace plugin entry is Desktop-installable (regression guard for v2.3.1)
+      - name: Marketplace plugin entry is Desktop-installable
         shell: bash
         run: |
           set -e
           python <<'PY'
-          import json, os, sys
+          import json, os
           mp = json.load(open(".claude-plugin/marketplace.json"))
           plug = mp["plugins"][0]
-
-          # 1) Explicit skills array - without this Desktop's stricter validator
-          # rejects the plugin (CLI auto-discovers and masks the gap).
-          assert "skills" in plug, "FAIL: plugins[0].skills missing - Desktop install will fail"
+          assert "skills" in plug, "FAIL: plugins[0].skills missing"
           assert isinstance(plug["skills"], list) and len(plug["skills"]) > 0, \
-              "FAIL: plugins[0].skills must be a non-empty array of paths"
-
-          # 2) Every declared skill path resolves to an actual SKILL.md on disk.
+              "FAIL: plugins[0].skills must be a non-empty array"
           for rel in plug["skills"]:
               skill_md = os.path.join(rel.lstrip("./"), "SKILL.md")
               assert os.path.isfile(skill_md), \
                   f"FAIL: declared skill '{rel}' has no SKILL.md at {skill_md}"
-
-          # 3) source must point somewhere that contains .claude-plugin/plugin.json
           src = plug.get("source", "")
           src_dir = "." if src in (".", "./", "") else src
           assert os.path.isfile(os.path.join(src_dir, ".claude-plugin", "plugin.json")), \
-              f"FAIL: source='{src}' does not resolve to a directory containing .claude-plugin/plugin.json"
-
-          print(f"OK: marketplace plugin entry validates ({len(plug['skills'])} skill path(s) declared, all resolve)")
+              f"FAIL: source='{src}' has no .claude-plugin/plugin.json"
+          print(f"OK: marketplace plugin entry validates ({len(plug['skills'])} skill path(s))")
           PY
+
+      - name: bin/reeinvent-deck script is executable
+        shell: bash
+        run: |
+          test -x skills/reeinvent-pitch-deck-design/bin/reeinvent-deck
+          echo "OK: bin/reeinvent-deck is executable"

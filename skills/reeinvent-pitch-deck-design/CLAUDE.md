@@ -217,10 +217,10 @@ Claude makes these mistakes by default. Pre-empt them.
 ## How to handle common requests
 
 ### "Create a test layout / deck / slide"
-1. Identify the archetype from `reference.md` (A1–A10) or the DESIGN.md template (§6).
-2. Use only the 9 colors, the 3 gradients, Roboto, and the SVG assets.
-3. Populate with generic placeholders (`Headline`, `Service Name`, `Audience One`).
-4. Invoke **`normalize`** to verify DESIGN.md compliance, then run the pre-flight checklist, before responding "done."
+1. Decide Path A or Path B. Default to Path A for any client-facing or external-facing slide.
+2. **Path A**: clone the master via `<skill_root>/bin/reeinvent-clone-master -o ./test.pptx`, inspect, replace text, open. The output uses the master's bespoke layouts and photography.
+3. **Path B (only when explicitly asked for "skeleton" / "rough draft")**: write a JSON spec, run the generator, document the output as "skeleton, not ready for clients."
+4. If the user requests a screenshot review afterwards, walk the deck against the pre-flight checklist below and the master-deck reference (re-inspect a fresh clone if needed).
 
 ### "Add a new rule / change a rule"
 1. Read the existing section in DESIGN.md.
@@ -237,11 +237,12 @@ Claude makes these mistakes by default. Pre-empt them.
 5. Then use it in demos.
 
 ### "Fix a demo"
-1. If the user sent a screenshot, invoke **`critique`** first for a structured assessment.
-2. Identify which DESIGN.md rule the current rendering violates.
-3. Quote the rule.
-4. Make the minimal edit that brings the demo into compliance.
-5. Invoke **`normalize`** to verify the fix didn't introduce a new violation elsewhere.
+1. If the user sent a screenshot, identify the master-deck slide it most resembles. Compare deltas (typography scale, photography presence, layout symmetry).
+2. For each delta: quote the DESIGN.md rule OR cite the master-deck slide that contradicts the user's version.
+3. If the deck was Path A: re-inspect, identify the leftover default copy or wrong substitution, run `replace` with the correction.
+4. If the deck was Path B (skeleton): rebuild with corrected spec OR migrate the user to Path A entirely.
+5. If the deck was hand-authored: make the minimal direct edit.
+6. Re-open the deck in PowerPoint for the user to verify.
 
 ### "Export / convert to PPTX or PDF"
 
@@ -249,57 +250,72 @@ Claude makes these mistakes by default. Pre-empt them.
 
 | Goal | Use this path | Why |
 |------|---------------|-----|
+| Editable `.pptx` (the canonical Reeinvent deliverable) | `bin/reeinvent-deck build deck.json -o deck.pptx` | Deterministic generator: theme colors, embedded fonts, native shapes, gradient text on stat numbers, all per DESIGN.md §12. One command, no hand-rolled python-pptx. |
 | Best-quality PDF for client distribution | HTML deck -> `scripts/render-pdf.py` (headless Chrome) | SVGs stay vector, gradients stay vector, fonts embed cleanly. No raster compression. |
-| Editable `.pptx` the presenter can tweak in PowerPoint / Keynote | python-pptx via `anthropic-skills:pptx` | Native shapes + live text + theme colors per DESIGN.md §12. Run `scripts/embed-fonts.py` after. |
-| PDF when the source is already `.pptx` | LibreOffice or PowerPoint export | Acceptable for editing-flow PDFs. Lossy: PNGs get downsampled and JPEG-recompressed - logos and gradient bands degrade visibly versus the HTML source. |
+| PDF when the source is already `.pptx` | LibreOffice or PowerPoint export of the generator output | Acceptable for editing-flow PDFs. Lossy: PNGs get downsampled and JPEG-recompressed; logos and gradient bands degrade slightly. |
 
-**Never** route HTML -> PPTX -> PDF for a client deliverable. The PPTX step rasterizes vectors, and the PDF step compresses the rasters again. Two passes of quality loss for a deliverable that the user will only ever view, not edit.
+**Never** route HTML -> PPTX -> PDF for a client deliverable. The PPTX step rasterizes vectors and the PDF step compresses the rasters again.
 
-The canonical client-distribution flow is:
+**The canonical PPTX flow is the generator.** Spec in, deck out:
 
 ```
-build the deck as HTML (SVGs, CSS, no rasterization)
-└─> python3 scripts/render-pdf.py deck.html        # vector PDF
-    + (optional, if presenter wants to edit)
-    └─> python-pptx build to deck.pptx              # editable .pptx
-        + python3 scripts/embed-fonts.py deck.pptx  # Roboto embedded
+write deck.json (one entry per slide, archetype + content)
+└─> bin/reeinvent-deck build deck.json -o deck.pptx
+    └─> generator runs python-pptx + applies brand theme + post-embeds Roboto + verifies
 ```
 
-DESIGN.md §12 documents the PPTX-side rules. The HTML deck must include `@media print` rules so `render-pdf.py` (or the user's own browser print) flattens cleanly.
+The generator covers the 12 production archetypes (cover, section_divider, intro_split, content, two_column, stat, three_up, quote, closing, agenda, service_detail, success_story). See `SKILL.md` "Spec format" for the full schema and `generator/examples/reeinvent-full.json` for a populated reference deck.
 
-## Available skills
+If the user needs an archetype the generator does not support, surface that and ask whether to add a new builder under `generator/reeinvent_pitch_deck/builders/` (treated as a brand-system addition; follow the propose-then-confirm rule).
 
-Six specialized skills are installed. When a request matches one of these triggers, **invoke the skill via the Skill tool first** instead of doing the work by hand. These are pre-built capabilities - they do the job faster and more reliably than ad-hoc effort.
+DESIGN.md §12 documents the PPTX-side rules; the generator encodes them. Do not regenerate brand elements by hand.
 
-### `anthropic-skills:pptx` - PowerPoint file handling
-**Trigger**: any request involving a `.pptx` file - creating, reading, editing, extracting content, combining, or generating a deck from the rules in DESIGN.md.
-**Invoke when the user says**: "make a .pptx", "convert this deck to PowerPoint", "open the master deck", "extract the slides from [file].pptx", "build a deck matching our system as a .pptx file".
+## How to build a Reeinvent PPTX deck
 
-### `anthropic-skills:pdf` - PDF file handling
-**Trigger**: any request involving a `.pdf` - reading reference decks, extracting text / tables / images, merging exports, running OCR, exporting the pitch deck to PDF.
-**Invoke when the user says**: "read the reference deck", "extract the brand guide's typography", "export the pitch deck to PDF", "merge these PDFs", "what does the 2-pager look like?".
+Two paths. **Default to Path A for any client-facing deck.** Path B is for skeletons.
 
-### `normalize` - design-system compliance audit
-**Trigger**: checking whether something complies with DESIGN.md. This is this project's core loop - use liberally.
-**Invoke when the user says**: "is this on brand?", "does this follow the rules?", "clean this up to match the system", "audit against DESIGN.md", or when you finish a non-trivial demo edit and want to self-verify before responding "done".
+### Path A (canonical, premium): clone the production master and edit text
 
-### `polish` - pre-ship quality pass
-**Trigger**: catching alignment, spacing, and micro-detail issues before a deck ships. Run after substantive edits, always run before the user takes the deck to a real audience.
-**Invoke when the user says**: "polish this", "final pass", "getting ready to ship", "last tune-up", or when you're about to respond "done" on a deck that will be presented externally.
+The Reeinvent design team maintains the master at `~/Reeinvent/Templates/REE 2.0 - Master Company Presentation.pptx`. It carries real photography, custom mockup clusters, partner-alliance accents, and bespoke typography decisions no algorithm replicates.
 
-### `critique` - UX / visual design review
-**Trigger**: structured design feedback. Use when the user sends a screenshot, says something looks "off," or asks "what's wrong here?".
-**Invoke when the user says**: "review this slide", "this looks wrong", "what's off about this?", or sends a screenshot of a working deck asking for feedback. **Run `critique` before `polish`** when both could apply - critique identifies problems, polish fixes finish details.
+```bash
+# 1. Clone the master into the user's cwd (auto-locates, opens in PowerPoint)
+<skill_root>/bin/reeinvent-clone-master -o ./<prospect>.pptx
 
-### `audit` - technical quality check
-**Trigger**: accessibility, responsive behavior, and anti-pattern checks before a deck is exported to PDF or sent externally.
-**Invoke when the user says**: "is this accessible?", "run an audit", "WCAG check", "responsive test", or before any PDF export that will be distributed beyond internal review.
+# 2. List every text shape on every slide so you can plan replacements
+<skill_root>/bin/reeinvent-deck inspect ./<prospect>.pptx
 
-### Skill invocation notes
-- Use the `Skill` tool with the exact skill name (including the `anthropic-skills:` prefix for `pptx` and `pdf`).
-- When multiple skills could apply, pick the most specific first - e.g., a screenshot of a slide with spacing issues → `critique` first, then `polish`.
-- When in doubt whether a skill applies, **run it**. Cost of invoking a skill is low; cost of hand-rolling work a skill would have done better is high.
-- Never mention a skill name without invoking it.
+# 3. Build a {old: new} JSON map matching strings VERBATIM from inspect output
+#    (curly apostrophes, newlines, all preserved). Show the map to the user
+#    before applying.
+
+# 4. Apply text replacements (preserves layout, photos, gradients, fonts)
+<skill_root>/bin/reeinvent-deck replace ./<prospect>.pptx /tmp/replacements.json
+
+# 5. Re-inspect to confirm every replacement landed and find leftover defaults
+
+# 6. Tell the user which slides to delete in PowerPoint (right-click -> Delete)
+#    for slides that do not apply. Do NOT delete slides via python-pptx.
+```
+
+What text replacement preserves: layout, photos, gradients, theme colors, run-level typography, speaker notes, embedded fonts. What it does NOT cover: photography swaps (tell user to use PowerPoint's "Change Picture"), adding new slides (PowerPoint's "Duplicate Slide"), or layout changes (PowerPoint manual edit).
+
+### Path B (skeleton mode): generate a brand-correct draft from JSON
+
+For internal drafts, throwaway demos, or when the user explicitly asks for "skeleton" or "rough draft":
+
+```bash
+<skill_root>/bin/reeinvent-deck build deck.json -o deck.pptx
+```
+
+The generator produces brand-correct primitives (theme colors, fonts, gradients, native shapes) but NOT the master's premium visual quality. **Do not ship Path B output to a paying client without running it through Path A polish.** Skeleton-mode spec format is in `generator/reeinvent_pitch_deck/spec.py`; reference example at `generator/examples/reeinvent-full.json`.
+
+### Workflow phases (named for shared vocabulary)
+
+- **normalize** - check the deck against DESIGN.md before saving.
+- **critique** - structured design feedback on a screenshot. Identify the master-deck slide it should match, name the deltas.
+- **polish** - pre-ship pass for alignment, spacing, photography. For Path A this is mostly: did Claude leave any default master copy that should have been replaced?
+- **audit** - accessibility / WCAG / contrast check before external distribution.
 
 ## Pre-flight checklist (run before saying "done")
 

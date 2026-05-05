@@ -1,135 +1,117 @@
 ---
 name: reeinvent-pitch-deck-design
-description: Apply the Reeinvent brand system when building any pitch deck, slide, cover, section divider, service-offer layout, contact slide, success story, or HTML/PPTX/PDF surface meant to ship under the Reeinvent brand. Use whenever the user asks for a Reeinvent presentation, asks "is this on-brand?" about a Reeinvent surface, or invokes a Reeinvent-branded layout.
+description: Build premium Reeinvent pitch decks by cloning the production master and editing text. Use whenever the user asks for a Reeinvent presentation, slide, cover, section divider, service-offer layout, contact slide, success story, or any HTML/PPTX/PDF surface meant to ship under the Reeinvent brand. Also use when the user asks "is this on-brand?" about a Reeinvent surface.
 ---
 
 # Reeinvent Pitch Deck Design
 
-You are the custodian of the Reeinvent brand system when this skill is active. Every slide, component, or surface must follow the brand rules below. The brand serves a paying client, so design fidelity is the single quality that matters.
+You are the custodian of the Reeinvent brand system when this skill is active. Decks ship to paying clients; design fidelity is the only quality that matters.
 
 ## When to use this skill
 
-- The user asks for a deck, slide, cover, section divider, success story, stat slide, contact slide, or any other presentation surface for Reeinvent.
-- The user sends a screenshot of a deck or slide and asks for a review, critique, or fix.
+- The user asks for a deck, slide, cover, section divider, success story, stat slide, contact slide, or any other Reeinvent presentation surface.
+- The user sends a screenshot of a deck or slide and asks for a review or fix.
 - The user asks to refactor, polish, or normalize a Reeinvent-branded surface.
-- The user mentions `DESIGN.md`, `CLAUDE.md`, the Reeinvent brand, or a slide archetype (A1 cover, A2 divider, A5 service detail, etc.).
+- The user mentions DESIGN.md, CLAUDE.md, the Reeinvent brand, or a slide archetype.
 
-## Before first steps: check for brand-system updates
+## Two paths. One default.
 
-Before reading the ground-truth files, verify the installed skill is current. Run this check once per session.
+This skill supports two workflows. **Default to Path A for any client-facing deck.** Path B is a fast skeleton tool for internal drafts.
 
-1. Read the local `VERSION` file at the skill root.
-2. Fetch the latest from `https://raw.githubusercontent.com/rebrained-de/Reeinvent-Pitch-Deck-Designer/main/VERSION`.
-3. Compare trimmed strings.
-4. **If they differ**, tell the user: *"Reeinvent brand system is outdated (local vX.Y.Z, latest vA.B.C). Pull or reinstall before continuing."* Wait for the user's decision - do not continue applying rules that may have been superseded.
-5. **If the fetch fails** (offline, GitHub unreachable, repo private), note the failure in one line and proceed.
+### Path A (canonical): clone the production master, edit text
 
-Bump discipline for `VERSION` is documented in `CLAUDE.md` → "Session start: check for brand-system updates."
+The Reeinvent design team maintains a 21-slide master PowerPoint at `~/Reeinvent/Templates/REE 2.0 - Master Company Presentation.pptx` (auto-located by the skill). Every slide is laid out by a human designer with real photography, custom mockup clusters, and bespoke typography decisions no algorithm replicates.
 
-## First steps in any session where this skill applies
+To produce a client deck: clone the master, edit the text for the new prospect, delete unused slides. **Layout, photos, gradients, and design judgment all carry through unchanged.**
 
-1. Read `DESIGN.md` - the complete brand law.
-2. Read `CLAUDE.md` - the 32 non-negotiable rules and the pre-flight checklist.
-3. Read `reference.md` if slide layouts are involved - it catalogs the 10 production slide archetypes (A1 through A10).
+#### Workflow
 
-These three files are the ground truth. When a rule conflicts across files, `DESIGN.md` wins.
+1. **Clone the master** to a working file:
+   ```bash
+   <skill_root>/bin/reeinvent-clone-master -o <cwd>/<prospect>.pptx
+   ```
+   Auto-locates the master via env vars / `~/Reeinvent/Templates/` / `~/Documents/Reeinvent/` / `~/Downloads/` (in that order). Opens in PowerPoint after copying. See `templates/README.md` for first-time setup.
 
-## The rules that must never be violated
+2. **Inspect the deck** to plan edits:
+   ```bash
+   <skill_root>/bin/reeinvent-deck inspect <cwd>/<prospect>.pptx
+   ```
+   Lists every slide with its layout name and the text content of every shape, so you can identify exactly which strings to replace. Copy strings VERBATIM from this output (including curly apostrophes `'`, em-dashes the master may use in non-Reeinvent quoted material, and newlines) when building the replacement map.
 
-### Colors (9 only)
-Ink `#0A1220`, Deep Navy `#1B2848`, Off-White `#F5F5F5`, White `#FFFFFF`, Core Blue `#2665E2`, Mid Blue `#3C74E2`, Sky Blue `#6C94E5`, Core Violet `#A942EF`, Mid Violet `#C26DE6`, Soft Violet `#D79BEC`. No other colors exist.
+3. **Build a replacement map** as JSON `{old_string: new_string}`. Match strings that the inspect output shows. Multi-paragraph strings should be split into per-paragraph entries because PowerPoint text frames store one paragraph per run group.
+
+   ```json
+   {
+     "Concept Sprint": "Northwind Sprint",
+     "reeinvent.com/concept-sprint": "reeinvent.com/northwind-sprint",
+     "Turn your idea into": "Turn Northwind's pricing into",
+     "investor-ready proof": "investor-ready engine"
+   }
+   ```
+
+4. **Apply the replacements**:
+   ```bash
+   <skill_root>/bin/reeinvent-deck replace <cwd>/<prospect>.pptx /tmp/replacements.json
+   ```
+   Or restrict to specific slides: `--slides 1,2,4,8`.
+
+5. **Re-inspect** to confirm every replacement landed, AND to find any string that's still master-default copy you forgot to override.
+
+6. **Tell the user which slides to delete** in PowerPoint (`Right-click slide -> Delete`) for slides that don't apply to this prospect. Do NOT try to delete slides via python-pptx; the slide-removal API is fragile and can break the master's design relationships. Manual delete in PowerPoint is reliable.
+
+7. **Open the deck for the user** if not already open: `open -a "Microsoft PowerPoint" <cwd>/<prospect>.pptx`.
+
+#### What python-pptx text replacement preserves
+
+- Slide layout (every shape's geometry, rotation, group hierarchy)
+- Theme colors, gradients, shadows, photography, embedded videos
+- Run-level typography (font, weight, color, italic) on the kept portion of the run
+- Speaker notes (untouched unless explicitly named in the replacement map)
+- Embedded fonts
+
+#### What text replacement does NOT cover
+
+- **Photography swaps** — replacing a real customer logo or product mockup. Tell the user to swap the image manually in PowerPoint (`Right-click image -> Change Picture -> This Device`).
+- **Adding new slides** — duplicating a service-detail slide for a fifth offering. PowerPoint's `Duplicate Slide` action is the user's job. The skill cannot reliably synthesize new slides matching the master's bespoke layouts.
+- **Layout changes** — moving shapes, resizing cards. Tell the user to do this in PowerPoint.
+
+#### When inspect shows text Claude needs to NOT touch
+
+The master deck contains real client copy in its case study slides (e.g., the Alva success story metrics). When prospecting a new client, those slides may need to be removed entirely (Step 6) rather than edited, OR the user supplies replacement metrics for the new client. Always show Claude's planned replacements to the user before running `replace` so they can correct anything that should stay verbatim.
+
+### Path B (skeleton mode): generate a brand-correct draft from JSON
+
+For internal drafts, throwaway demos, or contexts where the user just needs a starting point in the right brand: the generator at `<skill_root>/bin/reeinvent-deck build` produces a brand-correct (theme colors, fonts, primitives) deck from a JSON spec. **It does NOT replicate the master's premium visual quality** — it is a skeleton, not a finished deck.
+
+Skeleton-mode workflow is documented in `generator/README.md` and the spec format is in `generator/reeinvent_pitch_deck/spec.py`. Use only when:
+
+- The user explicitly says "draft", "skeleton", or "rough cut".
+- The user is presenting internally and a brand-shaped placeholder is acceptable.
+- The deck will not be sent to a paying client without first running through Path A polish.
+
+For all client-facing work, default to Path A.
+
+## Brand law (carries across both paths)
+
+### Colors (canonical 9, plus partner-color exception)
+Ink `#0A1220`, Deep Navy `#1B2848`, Off-White `#F5F5F5`, White `#FFFFFF`, Core Blue `#2665E2`, Mid Blue `#3C74E2`, Sky Blue `#6C94E5`, Core Violet `#A942EF`, Mid Violet `#C26DE6`, Soft Violet `#D79BEC`. Partner-alliance slides may include partner brand colors as accents (yellow for System Verification, teal for CodeScene) per the master deck precedent; this is the only documented exception.
 
 ### Gradients
-Always at **30 degrees**. Never 45, 135, or any cardinal direction. Three canonical gradients only: Signature (`#2665E2` to `#C26DE6`), Vivid (`#2665E2` to `#A942EF`), Dark (`#1B2848` to `#0A1220`).
+Always at 30 degrees. Three canonical gradients: Signature (`#2665E2` to `#C26DE6`), Vivid (`#2665E2` to `#A942EF`), Dark (`#1B2848` to `#0A1220`).
 
 ### Typography
-**Roboto only**, weights 300 / 400 / 500 / 700 / 900, plus 400 italic (pull quotes only). No other fonts, no other weights. Never Calibri, never Times, never Arial as primary.
+Roboto only. Weights 300 / 400 / 500 / 700 / 900, plus 400 italic for pull quotes. Embedded into every PPTX so the deck renders identically anywhere.
 
-### Assets (four brand marks, SVG + PNG per mark)
-
-Each canonical brand mark ships as an SVG (for HTML / web) and a PNG at 2x (for PPTX / Slides embedding).
-
-- `assets/logo/Arrow-Up.svg` / `Arrow-Up@2x.png` - background watermark, always flush top-right at `top: 0; right: 0;`, fully visible, never cropped.
-- `assets/logo/Upwards-Arrow.svg` / `Upwards-Arrow@2x.png` - bullet marker for lists, always used, never substituted.
-- `assets/logo/White-Logo.svg` / `White-Logo@2x.png` - white wordmark, use on dark or gradient surfaces.
-- `assets/logo/Gradient-Logo.svg` / `Gradient-Logo@2x.png` - gradient wordmark, use on light surfaces.
-
-**Routing by output format:**
-- HTML / web surfaces → use the `.svg` file.
-- PPTX / Google Slides → use the `@2x.png` file, inserted via `Slide.shapes.add_picture()`. PPTX renders SVG imports unreliably.
-- PDF via HTML print → SVG. PDF via PPTX export → PNG.
-
-Never inline SVG paths, never create new marks, never draw icons in CSS, never use an external icon library, never substitute SVG for PNG or vice versa outside the routing rule.
-
-### Text
-- No em-dash character (Unicode U+2014) in any text surface.
-- On dark backgrounds: default to White. Solid blue text is forbidden.
-- On light backgrounds: default to Ink. Gradient text permitted for emphasis with the safety contract.
-- Gradient text safety contract (mandatory for every `background-clip: text` element):
-  - `display: inline-block`
-  - `line-height: 1.4` minimum
-  - `0.15em` vertical padding minimum
-  - Both `color: transparent` and `-webkit-text-fill-color: transparent`
-  - Single font-size per element; never mix two sizes inside one gradient-text span.
-
-### Layout
-- One gradient underline per slide. Always. No exceptions.
-- One primary CTA per slide.
-- Buttons: content always center-aligned horizontally, intrinsic width, symmetric padding.
-- Sparse content slides (header plus one block): anchor the block to the bottom of the safe area, never to the top.
-- Arrow watermarks: flush top-right, fully visible, one per slide.
-- Gradient stripe under an eyebrow: width matches the eyebrow text width exactly.
-- Bullet list items: one line each (`white-space: nowrap`), tight noun-phrase copy, consistent grammatical cadence, maximum six items per list.
-
-## Working posture
-
-- **Propose rule changes before editing.** Any edit to `DESIGN.md`, `CLAUDE.md`, or asset scope must be proposed as options and confirmed before execution. Brand rules are not casually modified.
-- **Fix classes of failure, not instances.** When a rendering bug surfaces, propose a safety contract and a pre-flight check alongside the fix, so the failure mode cannot recur.
-- **Cite rules when invoking them.** Reference the DESIGN.md section and rule number (for example, "per §8 rule 4") so the user can verify.
-- **Responses are tight.** No adjective inflation, no "beautiful / stunning / sleek," no victory laps. State what changed and why in one or two sentences. Bullet lists welcome when they compress information.
-- **When blocked mid-task, stop and surface.** Tool failure, permission denied, missing input, or an output contract that can't be met: halt, report the block in one sentence, list alternatives ranked by brand fidelity, wait for the user to pick. Never silently switch engines, substitute formats, rasterize, or simplify. See `CLAUDE.md` → "When blocked mid-task."
-
-## Pre-flight before saying "done"
-
-Run through the checklist in `CLAUDE.md` before finishing any substantive edit. Every item must pass:
-
-- Every hex is one of the 9 canonical colors.
-- Every gradient is 30 degrees.
-- The Arrow is 0, 90, 180, or 270 degrees rotation only; never flipped; flush top-right on watermark duty.
-- Only the four canonical SVGs are referenced. No inline SVG paths, no data-URI SVGs, no CSS-drawn icons.
-- Roboto only, weights 300 / 400 / 500 / 700 / 900, plus 400 italic for pull quotes.
-- No pure `#000000` or `#FFFFFF` as a slide background.
-- One gradient underline per slide, one primary CTA per slide.
-- Text under 40pt on dark surfaces is white, not gradient.
-- Gradient stripes match text width.
-- Button content is center-aligned.
-- Bullet lists use `Upwards-Arrow.svg` (HTML) or `Upwards-Arrow@2x.png` (PPTX), and each item fits on one line.
-- Sparse slides anchor content to the bottom.
-- Every `background-clip: text` element satisfies the safety contract.
-- Zero em-dash characters (U+2014) in the file.
-- Placeholder text is generic; no real Reeinvent copy imported from reference PDFs.
-
-## PPTX output must be fully customizable (strict)
-
-When generating a `.pptx` deck, use the `anthropic-skills:pptx` skill (which wraps python-pptx). Never use PowerPoint automation (AppleScript, osascript, the PowerPoint app's scripting interface), Keynote scripting, or macro-based generation. The output must be fully editable by the presenter in PowerPoint, Keynote, or Google Slides. A flattened, image-only deck fails this rule.
-
-Every slide must have:
-
-1. **Live editable text.** Every text element is a native PowerPoint text frame. Never rasterized, never converted to paths.
-2. **Native shapes.** Cards, pills, gradient backgrounds, stripes, underlines, callouts are shape objects, not images.
-3. **SVG assets as picture objects** with alt text set, inserted via `add_picture()`. Reposition-able by the presenter.
-4. **Theme Colors defined** for all 9 palette entries, mapped to ACCENT_1 through ACCENT_6 slots. Shape fills reference the theme, not hard-coded RGB, so global re-skin works.
-5. **Theme Font** set to Roboto with Arial fallback (Major + Minor Font slots).
-6. **Slide Master + Layouts per archetype.** Cover, section divider, service detail, stat, contact, closing, agenda - each is a Slide Layout selectable from "New Slide".
-7. **Fonts embedded via post-processing.** python-pptx does not write embedded-font parts. After saving the .pptx, run `python scripts/embed-fonts.py OUTPUT.pptx` to inject the six Roboto TTFs from `assets/fonts/Roboto/`. Not optional - without this step the deck falls back to Arial on client machines.
-8. **Grouped elements** where they move as a unit (title + stripe + eyebrow).
-9. **Native charts** for any data visualization, not screenshots.
-10. **If any brand element cannot be rendered natively, stop - do not substitute.** Halt and report: which element failed, why native rendering failed, what alternatives exist. Never rasterize, flatten, omit, simplify "because it's close enough," or switch engines. Wait for the user to pick.
-
-**Before handing off a .pptx, verify**: click any text element (should enter edit mode), click any rectangle (should be movable), open the Theme Colors panel (9 brand colors should be present), and confirm the deck file contains `ppt/fonts/*.fntdata` entries (`unzip -l FILE.pptx | grep fntdata` should show 6 entries). If any element is locked as an image or fonts are missing, regenerate.
-
-See `DESIGN.md` §12 for the full spec.
+### Brand marks (full kit)
+The skill ships the four primary marks (Arrow-Up, Upwards-Arrow, White-Logo, Gradient-Logo) used by the generator. The full Reeinvent brand kit (Brand Guidelines + button library) lives in the user's local `~/Reeinvent/Brand-Kit/` directory if Asja has shared it; the master deck pulls from that kit. Do NOT recreate or invent additional marks.
 
 ## When in doubt
 
-Stop. Re-read `DESIGN.md`. If the answer is not there, ask the user. The trust in this brand system is measured in the absence of mistakes, not the presence of features.
+Stop. Re-read DESIGN.md. If the answer is not there, look at the actual master deck (`<skill_root>/bin/reeinvent-clone-master --no-open -o /tmp/inspect-master.pptx` then `inspect`). The master is the source of truth; DESIGN.md prose is a simplified summary that does not capture every brand pattern.
+
+## Working posture
+
+- **Default to Path A.** Building a deck from scratch via the generator is the wrong tool for client work. Layout, photography, and design judgment all need a human or the master deck.
+- **Show your replacements before running them.** When using `replace`, paste the JSON map for the user to confirm before mutating their working file.
+- **Surface limitations openly.** If the user asks for a slide pattern not in the master, say "I cannot synthesize that without the master containing an example; please ask Asja for an updated master OR build the slide manually in PowerPoint."
+- **Cite the master, not DESIGN.md, when arbitrating brand decisions.** The master deck is the source of truth.

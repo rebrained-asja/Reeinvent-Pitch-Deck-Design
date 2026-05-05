@@ -1,0 +1,78 @@
+#!/usr/bin/env bash
+# reeinvent-deck: zero-setup wrapper around the Python generator.
+#
+# What it does
+#   1. Locates the skill root (parent of this bin/ directory).
+#   2. Creates a sibling .venv and installs python-pptx if not present, OR
+#      rebuilds the venv if requirements.txt has changed.
+#   3. Invokes the generator CLI with all forwarded arguments.
+#
+# This script is the ONLY entry point Claude (or a human) needs to run. It
+# handles the Python environment so callers do not have to think about pip,
+# venvs, or python3 paths.
+#
+# Idempotent. Safe to run from any cwd. Prints diagnostics on first install
+# only, otherwise stays quiet.
+
+set -euo pipefail
+
+# Resolve script location even when symlinked. Required because /plugin
+# install copies the skill to ~/.claude/plugins/... and a manual install can
+# put it under ~/.claude/skills/...; both are valid.
+script_path="$(readlink -f -- "$0" 2>/dev/null || python3 -c "import os, sys; print(os.path.realpath(sys.argv[1]))" "$0")"
+SKILL_ROOT="$(cd "$(dirname "$script_path")/.." && pwd)"
+GENERATOR_DIR="$SKILL_ROOT/generator"
+VENV_DIR="$SKILL_ROOT/.venv"
+REQ_FILE="$GENERATOR_DIR/requirements.txt"
+HASH_FILE="$VENV_DIR/.deps_hash"
+
+if [ ! -d "$GENERATOR_DIR" ]; then
+  echo "reeinvent-deck: generator/ not found at $GENERATOR_DIR" >&2
+  echo "reeinvent-deck: the skill install is incomplete; reinstall the plugin." >&2
+  exit 1
+fi
+
+# Pick a python interpreter. Prefer python3, accept python.
+PYTHON_BIN="${REEINVENT_PYTHON:-}"
+if [ -z "$PYTHON_BIN" ]; then
+  if command -v python3 >/dev/null 2>&1; then
+    PYTHON_BIN="$(command -v python3)"
+  elif command -v python >/dev/null 2>&1; then
+    PYTHON_BIN="$(command -v python)"
+  else
+    echo "reeinvent-deck: no python3/python found on PATH." >&2
+    echo "reeinvent-deck: install Python 3.10+ and retry." >&2
+    exit 1
+  fi
+fi
+
+# Compute hash of requirements.txt for change detection.
+current_hash=""
+if [ -f "$REQ_FILE" ]; then
+  current_hash="$(shasum -a 256 "$REQ_FILE" | awk '{print $1}')"
+fi
+
+stored_hash=""
+if [ -f "$HASH_FILE" ]; then
+  stored_hash="$(cat "$HASH_FILE")"
+fi
+
+needs_setup=false
+if [ ! -x "$VENV_DIR/bin/python" ]; then
+  needs_setup=true
+elif [ "$current_hash" != "$stored_hash" ]; then
+  needs_setup=true
+fi
+
+if [ "$needs_setup" = "true" ]; then
+  echo "reeinvent-deck: setting up Python environment (one-time, ~30s)..." >&2
+  rm -rf "$VENV_DIR"
+  "$PYTHON_BIN" -m venv "$VENV_DIR"
+  # Suppress pip cache deserialization warnings (harmless, noisy on first run).
+  "$VENV_DIR/bin/pip" install --quiet --no-cache-dir -e "$GENERATOR_DIR" 2>&1 \
+    | grep -v "Cache entry deserialization" >&2 || true
+  echo "$current_hash" > "$HASH_FILE"
+  echo "reeinvent-deck: setup complete." >&2
+fi
+
+exec "$VENV_DIR/bin/python" -m reeinvent_pitch_deck "$@"

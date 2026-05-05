@@ -1,186 +1,206 @@
-# Reeinvent Pitch Deck Design System
+# Reeinvent Pitch Deck Designer
 
-Your AI-assisted brand kit for building Reeinvent-style presentations. Once installed, every slide Claude helps you build will automatically follow the Reeinvent brand rules: colors, typography, logo placement, gradient usage, and layout.
+A Claude-installable plugin that helps you build **premium Reeinvent pitch decks** from the production master deck. The skill clones the master, lets Claude swap text per prospect, and hands you a brand-perfect editable PPTX.
+
+The plugin also carries the brand law (DESIGN.md, CLAUDE.md, reference.md, four brand marks, six Roboto weights) so any HTML, slide, or surface Claude builds for Reeinvent stays on-brand.
+
+---
+
+## Two paths
+
+The skill supports two workflows. **Path A is canonical for any client-facing deck.** Path B is a fast skeleton tool for internal drafts.
+
+| Path | What it does | When to use |
+|------|--------------|-------------|
+| **A: Clone the master** | Duplicate the production master deck, edit text via Claude, you delete unused slides in PowerPoint. Layout, photography, bespoke typography all preserved from the human-designed master. | Every client-facing deck. The default. |
+| **B: Generate from JSON spec** | Code-driven generator builds a brand-correct skeleton from a JSON spec. Theme colors, fonts, gradients, native shapes - but no premium photography or bespoke layouts. | Internal drafts only. Throwaway demos. The user explicitly asks for a "skeleton" or "rough cut". |
+
+If you ship Path B output to a paying client without running it through Path A polish, you will not be happy with the result. Don't.
 
 ---
 
 ## What you need
 
-- **Claude Code**, **Claude Desktop**, or **Cowork** - any version that supports plugins (v2.0+).
+- **Claude Code**, **Claude Desktop**, or **Cowork** (any version that supports plugins, v2.0+).
 - A logged-in Anthropic account.
-
-That's it. No additional tools, no git required for the simple install.
-
-### Recommended companion skills
-
-Two Anthropic-published skills are referenced by the brand system for `.pptx` and `.pdf` work. They are not bundled here. Install them once if you plan to generate or read decks in those formats:
-
-- `anthropic-skills:pptx` - PowerPoint generation and editing.
-- `anthropic-skills:pdf` - PDF reading, extraction, and export.
-
-The brand system still loads without them; rules apply to every HTML / web surface unconditionally. The companion skills are only required when Claude is asked to produce or read a `.pptx` / `.pdf` directly.
+- **Python 3.10+** for the optional Path B skeleton generator. The bootstrap creates its own venv on first use; no manual `pip install`.
+- **One copy of the Reeinvent master deck** at a known location (see "First-time setup" below). Path A cannot work without it.
 
 ---
 
-## Install (recommended)
+## Install
 
-How you install depends on which Claude surface you use. All three install the same plugin - the command surface is just different.
+How you install depends on which Claude surface you use. All three install the same plugin.
 
 ### Claude Code (terminal) and Cowork
 
-In the terminal, paste:
-
 ```
 /plugin marketplace add rebrained-de/Reeinvent-Pitch-Deck-Designer
-```
-
-Then install the plugin:
-
-```
 /plugin install reeinvent-pitch-deck-design@reeinvent-brand-system
 ```
 
 ### Claude Desktop (app)
 
-The `/plugin` slash commands do **not** work in Desktop's chat input. Install via the GUI instead:
+The `/plugin` slash commands do not work in Desktop's chat input. Install via the GUI:
 
-1. Open **Settings → Code → Plugins** in the Desktop app.
+1. Open **Settings -> Code -> Plugins** in the Desktop app.
 2. Add the marketplace: `rebrained-de/Reeinvent-Pitch-Deck-Designer`.
 3. Install the `reeinvent-pitch-deck-design` plugin from the list.
 
 ### Verify the install
 
-Ask Claude:
-
-> "What brand system is active, and what version?"
-
-Claude should confirm it's running the Reeinvent Pitch Deck Design plugin and report a version matching the current `VERSION` file on GitHub. If it says "outdated" or "not found," re-run the install.
+Ask Claude: *"What brand system is active, and what version?"* — it should report the Reeinvent Pitch Deck Design plugin and a version matching the current `VERSION` file.
 
 ---
 
-## Install (fallback - manual download)
+## First-time setup (required for Path A)
 
-For offline installs or environments where the plugin marketplace is unavailable.
-
-### Option A - Download the ZIP
-
-1. Go to the [repository page](https://github.com/rebrained-de/Reeinvent-Pitch-Deck-Designer).
-2. Click the green **Code** button on the top right, then **Download ZIP**.
-3. Unzip the folder somewhere you'll remember, for example `~/Documents/Reeinvent-Brand`.
-
-### Option B - Clone with Git
+Drop the master deck at a stable location so the skill auto-finds it:
 
 ```bash
-git clone https://github.com/rebrained-de/Reeinvent-Pitch-Deck-Designer.git
+mkdir -p ~/Reeinvent/Templates
+mv ~/Downloads/"REE 2.0 – Master Company Presentation.pptx" ~/Reeinvent/Templates/
+# Optionally also the slim variant:
+mv ~/Downloads/"REE 2.0 – Slim Company Presentation.pptx" ~/Reeinvent/Templates/
 ```
 
-### Using the fallback install
+The skill auto-detects the master via this priority order:
+1. `REEINVENT_MASTER_DECK` env var (single file path)
+2. `REEINVENT_TEMPLATES_DIR` env var (directory)
+3. `~/Reeinvent/Templates/`
+4. `~/Documents/Reeinvent/Templates/`
+5. `~/Downloads/REE 2.0 *Master* Presentation.pptx` (fallback only)
 
-The plugin install above registers the brand system as a discoverable Claude skill. The manual install does the same thing by copying the skill folder into the user-skill directory Claude scans on startup.
-
-1. Open your terminal (Mac: Terminal / Windows: PowerShell).
-2. Make sure the user-skill directory exists, then copy the skill folder into it:
-   ```bash
-   mkdir -p ~/.claude/skills
-   cp -R ~/Documents/Reeinvent-Brand/skills/reeinvent-pitch-deck-design ~/.claude/skills/
-   ```
-   (Adjust the source path to wherever you unzipped or cloned the repo.)
-3. Start Claude Code from any working directory:
-   ```bash
-   claude
-   ```
-4. Verify the skill is discovered. Ask Claude:
-   > "What brand system is active, and what version?"
-
-   Claude should report `reeinvent-pitch-deck-design` and a version matching the `VERSION` file. If it does not, the copy step did not land in `~/.claude/skills/reeinvent-pitch-deck-design/SKILL.md` - re-run step 2.
-
-**Why the copy step matters:** Claude only auto-discovers skills from `~/.claude/skills/<name>/` (user) or `<project>/.claude/skills/<name>/` (project). Running `claude` inside the cloned repo without copying loads `CLAUDE.md` from the cwd but does not register the skill, so brand-rule triggers fire only when you stay inside that one folder.
-
-**To update later:** re-run step 2 (the `cp -R` overwrites the previous copy), or `git pull` in the source folder and copy again.
+If you do not have the master deck, ask Asja for the latest copy. The masters are not bundled with this repo (165 MB exceeds GitHub's per-file limit; they also contain client-confidential material).
 
 ---
 
-## How to use it with Claude
+## Usage
 
-Once installed (either path), just talk to Claude. The brand rules load automatically.
+Once installed and the master is in place, just talk to Claude.
 
-### Example prompts to try
+### Example prompts (Path A)
 
-> **"Build me a 10-slide pitch deck for [your topic]. Follow our brand system."**
+> **"Build me a 10-slide pitch deck for Northwind. Use slides 1-3 of the master, then service detail (Concept Sprint and Investor Demo) tailored to their pricing-engine use case, then the Alva success story but with placeholder metrics, plus contact and closing."**
 
-> **"Create a cover slide for a deck titled '[your title]'."**
+Claude will:
+1. Clone the master (`bin/reeinvent-clone-master`) into your cwd.
+2. Inspect every slide to map current text -> proposed replacement.
+3. Show you the replacement map for confirmation.
+4. Apply replacements via `bin/reeinvent-deck replace`.
+5. Re-inspect to verify.
+6. Tell you which slides to delete in PowerPoint manually.
+7. Open the result.
 
-> **"Review this slide layout against DESIGN.md and tell me what's off."**
+### Example prompts (Path B, skeleton)
 
-> **"Make a service-detail slide for our new offer called [offer name]. Use the A5 archetype from reference.md."**
+> **"Give me a quick skeleton 4-slide deck for an internal review. Cover, two stats, closing."**
 
-> **"Build a contact slide with our three office cities."**
+Claude switches to Path B, writes a JSON spec, runs the generator. Brand-correct skeleton. You polish manually if it ever becomes external-facing.
 
-> **"Show me the four slide archetypes I can use for a sales deck."**
+### Other things to ask Claude
 
-Claude knows the full brand system automatically: the 9 canonical colors, the 30-degree gradient, Roboto typography, the four brand marks (each with SVG for HTML and PNG for PPTX), the slide archetypes (cover, section divider, service detail, success story, stat, contact, closing), and every layout rule.
+> **"Review this slide against the Reeinvent master."** (paste a screenshot)
+
+> **"Inspect the master deck and tell me every service-detail slide that exists."**
+
+> **"What's the URL convention for service slides? Pull it from the master."**
 
 ---
 
 ## What's inside the plugin
 
-The brand-system files live at `skills/reeinvent-pitch-deck-design/` inside the plugin:
+```
+skills/reeinvent-pitch-deck-design/
+  SKILL.md                    skill manifest, two-path workflow
+  CLAUDE.md                   brand rules and operating manual
+  DESIGN.md                   brand guideline (simplified summary; master is ground truth)
+  reference.md                production slide archetypes catalogued
+  templates/README.md         where the master deck must live (first-time setup)
+  bin/
+    reeinvent-clone-master    clone the production master, open in PowerPoint
+    reeinvent-deck            inspect / replace / build / verify / embed (CLI)
+  generator/                  Path B skeleton generator (Python package + tests + examples)
+  scripts/
+    embed-fonts.py            standalone font embed (back-compat)
+    render-pdf.py             HTML deck -> vector PDF via headless Chrome
+  assets/
+    logo/                     four primary brand marks (SVG + PNG @2x)
+    fonts/Roboto/             six TTFs (Apache 2.0)
+```
 
-- **SKILL.md** - Skill manifest. Claude invokes it automatically when you work on a Reeinvent surface.
-- **CLAUDE.md** - The operating manual for Claude. The 32 non-negotiable rules and the pre-flight checklist.
-- **DESIGN.md** - The complete brand guideline. Every rule Claude follows.
-- **reference.md** - Slide archetypes distilled from real Reeinvent presentations.
-- **assets/logo/** - The four brand marks, each as SVG (for HTML / web) and PNG at 2x (for PPTX / Slides embedding).
-- **assets/fonts/Roboto/** - Roboto TTFs (Apache 2.0), auto-embedded into every generated `.pptx`.
-- **scripts/embed-fonts.py** - PPTX post-processor that embeds Roboto into output decks.
-- **scripts/render-pdf.py** - HTML deck → vector PDF via headless Chrome. Use for client-distributed PDFs so SVGs and gradients stay vector instead of getting downsampled by the PPTX → PDF route.
-
-Distribution metadata at the repo root: `README.md`, `CHANGELOG.md`, `VERSION`, `.claude-plugin/`.
+The full Reeinvent brand kit (Brand Guidelines PDF + button library) lives separately in your local `~/Reeinvent/Brand-Kit/` if Asja has shared it. The skill does not bundle it.
 
 ---
 
-## Updating to a new version
-
-### Plugin install
+## Updating
 
 ```
 /plugin update reeinvent-pitch-deck-design@reeinvent-brand-system
 ```
 
-### Manual install
+The bootstrap rebuilds Python deps automatically when needed. The master deck is updated separately (drop a new copy into `~/Reeinvent/Templates/` overwriting the old one).
 
-Re-download the ZIP (or `git pull` inside the cloned folder), then re-copy:
+---
+
+## Manual install (offline, no marketplace)
 
 ```bash
-cp -R ~/Documents/Reeinvent-Brand/skills/reeinvent-pitch-deck-design ~/.claude/skills/
+git clone https://github.com/rebrained-de/Reeinvent-Pitch-Deck-Designer.git
+mkdir -p ~/.claude/skills
+cp -R Reeinvent-Pitch-Deck-Designer/skills/reeinvent-pitch-deck-design ~/.claude/skills/
 ```
 
-The brand system checks for updates the first time you ask Claude for a Reeinvent surface in a session - if your local copy is behind GitHub, Claude will tell you in one line and wait for you to update. The check runs at skill activation, not at session start, so a session that never asks for a Reeinvent surface will not trigger it.
+Then drop the master deck into `~/Reeinvent/Templates/` per "First-time setup" above.
+
+---
+
+## CLI reference (for scripted use)
+
+```bash
+# Clone the production master deck (auto-locates)
+bin/reeinvent-clone-master -o my-deck.pptx [--variant master|slim|two-pager] [--no-open]
+
+# List every text shape on every slide of any deck
+bin/reeinvent-deck inspect deck.pptx [--json]
+
+# Apply text replacements from a {old: new} JSON map
+bin/reeinvent-deck replace deck.pptx replacements.json [-o output.pptx] [--slides 1,2,4]
+
+# Path B: build a skeleton deck from a JSON spec
+bin/reeinvent-deck build spec.json -o deck.pptx
+
+# Run brand pre-flight checks on any deck
+bin/reeinvent-deck verify deck.pptx
+
+# Inject Roboto font embedding into any existing deck
+bin/reeinvent-deck embed deck.pptx
+```
 
 ---
 
 ## Common questions
 
-**Do I need to tell Claude about the brand every time?**
-No. Once installed, the brand rules apply whenever Claude is working on a Reeinvent surface.
+**Why isn't the generator the canonical workflow?**
+The Reeinvent master deck is built by a human designer with bespoke layouts (mega-display "AI-DRIVEN" titles, laptop+screenshot mockup clusters, partner-brand alliance colors) that no algorithm replicates without significant custom photography and per-slide judgment. v3.0.0 attempted code generation as the canonical path; it produced brand-shaped output but not Reeinvent-quality output. Path A clones the actual master, which already has all the design judgment baked in.
 
-**Can I use this in any folder?**
-Yes, with either install path. The plugin install registers the skill globally. The manual install does the same thing once you have copied `skills/reeinvent-pitch-deck-design/` into `~/.claude/skills/` (see "Using the fallback install" above). After that, the brand system activates anywhere Claude detects a Reeinvent surface.
+**Can I edit the generated/cloned deck after Claude finishes?**
+Yes. Every shape and text frame remains editable in PowerPoint, Keynote, and Google Slides.
+
+**The master deck doesn't have a slide I need.**
+Tell Asja. New slide patterns get added to the master, then they're available in every Path A clone.
 
 **What if something looks off in the output?**
-Send the screenshot to your Rebrained contact. Every rendering edge case is considered a bug in the system, not a copy issue.
-
-**Can I edit the brand rules?**
-The files are yours to modify, but changing `DESIGN.md` or `CLAUDE.md` will change what Claude produces. Coordinate with your Rebrained contact before making rule changes.
+Send the screenshot. Path A output should look identical to the master except for swapped text; if it doesn't, the replacement broke a paragraph's run structure (rare but fixable).
 
 ---
 
 ## Support
 
-Questions, bug reports, or requests for new slide patterns: contact your Rebrained account lead.
+Questions, bug reports, or new slide-pattern requests: contact your Rebrained account lead.
 
 ---
 
 ## Credits
 
-Roboto fonts (`assets/fonts/Roboto/`) are bundled under the Apache License 2.0, copyright Google. See `assets/fonts/Roboto/LICENSE.txt` for the full license text.
+Roboto fonts (`assets/fonts/Roboto/`) are bundled under the Apache License 2.0, copyright Google. See `assets/fonts/Roboto/LICENSE.txt`.
