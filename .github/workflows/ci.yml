@@ -143,3 +143,33 @@ jobs:
           pl=$(python -c "import json; print(json.load(open('.claude-plugin/plugin.json'))['name'])")
           test "$mp" = "$pl"
           echo "OK: marketplace.plugins[0].name == plugin.json.name == $mp"
+
+      - name: Marketplace plugin entry is Desktop-installable (regression guard for v2.3.1)
+        shell: bash
+        run: |
+          set -e
+          python <<'PY'
+          import json, os, sys
+          mp = json.load(open(".claude-plugin/marketplace.json"))
+          plug = mp["plugins"][0]
+
+          # 1) Explicit skills array - without this Desktop's stricter validator
+          # rejects the plugin (CLI auto-discovers and masks the gap).
+          assert "skills" in plug, "FAIL: plugins[0].skills missing - Desktop install will fail"
+          assert isinstance(plug["skills"], list) and len(plug["skills"]) > 0, \
+              "FAIL: plugins[0].skills must be a non-empty array of paths"
+
+          # 2) Every declared skill path resolves to an actual SKILL.md on disk.
+          for rel in plug["skills"]:
+              skill_md = os.path.join(rel.lstrip("./"), "SKILL.md")
+              assert os.path.isfile(skill_md), \
+                  f"FAIL: declared skill '{rel}' has no SKILL.md at {skill_md}"
+
+          # 3) source must point somewhere that contains .claude-plugin/plugin.json
+          src = plug.get("source", "")
+          src_dir = "." if src in (".", "./", "") else src
+          assert os.path.isfile(os.path.join(src_dir, ".claude-plugin", "plugin.json")), \
+              f"FAIL: source='{src}' does not resolve to a directory containing .claude-plugin/plugin.json"
+
+          print(f"OK: marketplace plugin entry validates ({len(plug['skills'])} skill path(s) declared, all resolve)")
+          PY
