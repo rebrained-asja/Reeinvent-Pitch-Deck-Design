@@ -43,7 +43,7 @@ Ink `#0A1220`, Deep Navy `#1B2848`, Off-White `#F5F5F5`, White `#FFFFFF`, Core B
 Always at **30 degrees**. Never 45, 135, or any cardinal direction. Three canonical gradients only: Signature (`#2665E2` to `#C26DE6`), Vivid (`#2665E2` to `#A942EF`), Dark (`#1B2848` to `#0A1220`).
 
 ### Typography
-**Roboto only**, weights 300 / 400 / 500 / 700 / 900. No other fonts, no other weights. Never Calibri, never Times, never Arial as primary.
+**Roboto only**, weights 300 / 400 / 500 / 700 / 900, plus 400 italic (pull quotes only). No other fonts, no other weights. Never Calibri, never Times, never Arial as primary.
 
 ### Assets (four brand marks, SVG + PNG per mark)
 
@@ -97,7 +97,7 @@ Run through the checklist in `CLAUDE.md` before finishing any substantive edit. 
 - Every gradient is 30 degrees.
 - The Arrow is 0, 90, 180, or 270 degrees rotation only; never flipped; flush top-right on watermark duty.
 - Only the four canonical SVGs are referenced. No inline SVG paths, no data-URI SVGs, no CSS-drawn icons.
-- Roboto only, weights 300 / 400 / 500 / 700 / 900.
+- Roboto only, weights 300 / 400 / 500 / 700 / 900, plus 400 italic for pull quotes.
 - No pure `#000000` or `#FFFFFF` as a slide background.
 - One gradient underline per slide, one primary CTA per slide.
 - Text under 40pt on dark surfaces is white, not gradient.

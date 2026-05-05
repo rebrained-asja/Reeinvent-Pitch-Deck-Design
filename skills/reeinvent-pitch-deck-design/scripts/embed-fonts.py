@@ -225,23 +225,6 @@ def rewrite_pptx(input_path: Path, output_path: Path) -> None:
         missing = required - names
         if missing:
             raise ValueError(f"pptx is missing required parts: {sorted(missing)}")
-        with zipfile.ZipFile(tmp_path, "w", zipfile.ZIP_DEFLATED) as zout:
-            # First pass: copy or rewrite each existing member.
-            rel_ids = []
-            for name in zin.namelist():
-                data = zin.read(name)
-                if name == "[Content_Types].xml":
-                    data = patch_content_types(data)
-                elif name == "ppt/_rels/presentation.xml.rels":
-                    data, rel_ids = patch_presentation_rels(data, fonts)
-                zout.writestr(name, data)
-            # presentation.xml needs rel_ids that we computed in the
-            # rels pass above. We have to rewrite it in a second pass
-            # because zipfile doesn't let us modify members already
-            # written. So we exclude it above and write it here.
-            # Instead, we re-open and handle it in one pass below.
-        # One-pass variant: redo above but delaying presentation.xml write.
-    # Simpler approach: do everything in one pass, buffering presentation.xml.
     with zipfile.ZipFile(input_path, "r") as zin, zipfile.ZipFile(
         tmp_path, "w", zipfile.ZIP_DEFLATED
     ) as zout:

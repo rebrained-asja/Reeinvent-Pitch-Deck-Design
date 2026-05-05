@@ -11,6 +11,15 @@ Your AI-assisted brand kit for building Reeinvent-style presentations. Once inst
 
 That's it. No additional tools, no git required for the simple install.
 
+### Recommended companion skills
+
+Two Anthropic-published skills are referenced by the brand system for `.pptx` and `.pdf` work. They are not bundled here. Install them once if you plan to generate or read decks in those formats:
+
+- `anthropic-skills:pptx` - PowerPoint generation and editing.
+- `anthropic-skills:pdf` - PDF reading, extraction, and export.
+
+The brand system still loads without them; rules apply to every HTML / web surface unconditionally. The companion skills are only required when Claude is asked to produce or read a `.pptx` / `.pdf` directly.
+
 ---
 
 ## Install (recommended)
@@ -67,16 +76,27 @@ git clone https://github.com/rebrained-de/Reeinvent-Pitch-Deck-Designer.git
 
 ### Using the fallback install
 
+The plugin install above registers the brand system as a discoverable Claude skill. The manual install does the same thing by copying the skill folder into the user-skill directory Claude scans on startup.
+
 1. Open your terminal (Mac: Terminal / Windows: PowerShell).
-2. Go into the brand-system folder inside the download:
+2. Make sure the user-skill directory exists, then copy the skill folder into it:
    ```bash
-   cd ~/Documents/Reeinvent-Brand/skills/reeinvent-pitch-deck-design
+   mkdir -p ~/.claude/skills
+   cp -R ~/Documents/Reeinvent-Brand/skills/reeinvent-pitch-deck-design ~/.claude/skills/
    ```
-3. Start Claude Code:
+   (Adjust the source path to wherever you unzipped or cloned the repo.)
+3. Start Claude Code from any working directory:
    ```bash
    claude
    ```
-4. Claude will automatically load the brand system from this folder and follow every rule.
+4. Verify the skill is discovered. Ask Claude:
+   > "What brand system is active, and what version?"
+
+   Claude should report `reeinvent-pitch-deck-design` and a version matching the `VERSION` file. If it does not, the copy step did not land in `~/.claude/skills/reeinvent-pitch-deck-design/SKILL.md` - re-run step 2.
+
+**Why the copy step matters:** Claude only auto-discovers skills from `~/.claude/skills/<name>/` (user) or `<project>/.claude/skills/<name>/` (project). Running `claude` inside the cloned repo without copying loads `CLAUDE.md` from the cwd but does not register the skill, so brand-rule triggers fire only when you stay inside that one folder.
+
+**To update later:** re-run step 2 (the `cp -R` overwrites the previous copy), or `git pull` in the source folder and copy again.
 
 ---
 
@@ -128,9 +148,13 @@ Distribution metadata at the repo root: `README.md`, `CHANGELOG.md`, `VERSION`, 
 
 ### Manual install
 
-Re-download the ZIP, or `git pull` inside the cloned folder.
+Re-download the ZIP (or `git pull` inside the cloned folder), then re-copy:
 
-Claude will warn you at session start if your local copy is behind the GitHub version.
+```bash
+cp -R ~/Documents/Reeinvent-Brand/skills/reeinvent-pitch-deck-design ~/.claude/skills/
+```
+
+The brand system checks for updates the first time you ask Claude for a Reeinvent surface in a session - if your local copy is behind GitHub, Claude will tell you in one line and wait for you to update. The check runs at skill activation, not at session start, so a session that never asks for a Reeinvent surface will not trigger it.
 
 ---
 
@@ -140,7 +164,7 @@ Claude will warn you at session start if your local copy is behind the GitHub ve
 No. Once installed, the brand rules apply whenever Claude is working on a Reeinvent surface.
 
 **Can I use this in any folder?**
-With the plugin install - yes, the brand system activates anywhere Claude detects a Reeinvent surface. With the manual install - only when Claude is running from the folder you downloaded.
+Yes, with either install path. The plugin install registers the skill globally. The manual install does the same thing once you have copied `skills/reeinvent-pitch-deck-design/` into `~/.claude/skills/` (see "Using the fallback install" above). After that, the brand system activates anywhere Claude detects a Reeinvent surface.
 
 **What if something looks off in the output?**
 Send the screenshot to your Rebrained contact. Every rendering edge case is considered a bug in the system, not a copy issue.
@@ -153,3 +177,9 @@ The files are yours to modify, but changing `DESIGN.md` or `CLAUDE.md` will chan
 ## Support
 
 Questions, bug reports, or requests for new slide patterns: contact your Rebrained account lead.
+
+---
+
+## Credits
+
+Roboto fonts (`assets/fonts/Roboto/`) are bundled under the Apache License 2.0, copyright Google. See `assets/fonts/Roboto/LICENSE.txt` for the full license text.
