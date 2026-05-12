@@ -3,6 +3,7 @@ name: CI
 on:
   push:
     branches: [main]
+    tags: ['v*']
   pull_request:
     branches: [main]
 
@@ -175,3 +176,61 @@ jobs:
 
           print(f"OK: marketplace plugin entry validates ({len(plug['skills'])} skill path(s) declared, all resolve)")
           PY
+
+  release:
+    name: Publish skill ZIP to GitHub Releases
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [smoke, lint]
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify tag matches VERSION file
+        shell: bash
+        run: |
+          set -e
+          tag="${GITHUB_REF_NAME#v}"
+          file_ver=$(tr -d '[:space:]' < VERSION)
+          echo "tag=$tag VERSION=$file_ver"
+          test "$tag" = "$file_ver" || {
+            echo "FAIL: tag $GITHUB_REF_NAME does not match VERSION ($file_ver). Bump VERSION or retag."
+            exit 1
+          }
+
+      - name: Build skill ZIP (SKILL.md at top-level folder, no @ in paths)
+        shell: bash
+        run: |
+          set -e
+          mkdir -p dist
+          version=$(tr -d '[:space:]' < VERSION)
+          out="dist/reeinvent-pitch-deck-design-${version}.zip"
+          (cd skills && zip -r "../$out" reeinvent-pitch-deck-design \
+              -x '*.DS_Store' '__MACOSX/*' '*/__pycache__/*' >/dev/null)
+          # Sanity-check the ZIP shape Cowork demands.
+          test "$(unzip -p "$out" reeinvent-pitch-deck-design/SKILL.md | head -1)" = "---" \
+            || { echo "FAIL: SKILL.md not at expected path in ZIP"; exit 1; }
+          if unzip -l "$out" | awk '{print $NF}' | grep -q '@'; then
+            echo "FAIL: '@' character found in a ZIP path (Cowork rejects these)"
+            unzip -l "$out" | awk '{print $NF}' | grep '@'
+            exit 1
+          fi
+          echo "OK: $out built and validated"
+
+      - name: Upload ZIP to the GitHub release for this tag
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -e
+          version=$(tr -d '[:space:]' < VERSION)
+          zip="dist/reeinvent-pitch-deck-design-${version}.zip"
+          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            gh release upload "$GITHUB_REF_NAME" "$zip" --clobber
+          else
+            gh release create "$GITHUB_REF_NAME" "$zip" \
+              --title "$GITHUB_REF_NAME" \
+              --notes "Skill ZIP for v${version}. Upload via Settings -> Capabilities -> Skills."
+          fi
+          echo "OK: $zip attached to release $GITHUB_REF_NAME"

@@ -28,16 +28,18 @@ Pick the version of Claude you use. You only need to install once.
 
 ### Install for Cowork
 
-1. Get the ZIP from your Rebrained contact (e.g. `reeinvent-pitch-deck-design-2.4.1.zip`).
+1. Download the latest skill ZIP from the [GitHub releases page](https://github.com/rebrained-de/Reeinvent-Pitch-Deck-Designer/releases/latest). Look for the file named `reeinvent-pitch-deck-design-X.Y.Z.zip` under "Assets."
 2. Open Cowork. Go to **Settings → Capabilities → Skills**.
 3. Click **Create skill** and upload the ZIP.
 4. Quit Cowork and reopen it once.
 
 Done.
 
+> **Don't use the green "Code → Download ZIP" button at the top of the repo.** That gives you the whole repository, not the skill bundle, and Cowork will reject it. Always use the release ZIP from step 1.
+
 ### Install for Claude Desktop
 
-1. Get the ZIP from your Rebrained contact (e.g. `reeinvent-pitch-deck-design-2.4.1.zip`).
+1. Download the latest skill ZIP from the [GitHub releases page](https://github.com/rebrained-de/Reeinvent-Pitch-Deck-Designer/releases/latest). Look for the file named `reeinvent-pitch-deck-design-X.Y.Z.zip` under "Assets."
 2. Open the Claude Desktop app. Go to **Settings → Capabilities → Skills**.
 3. Click **Create skill** and upload the ZIP.
 4. Quit the app (Cmd-Q on Mac, right-click → Exit on Windows) and reopen it.
@@ -96,12 +98,11 @@ When Rebrained releases an update, here's how to refresh your install.
 
 ### Update on Cowork or Claude Desktop
 
-You'll get a new ZIP file (e.g. `reeinvent-pitch-deck-design-2.5.0.zip`).
-
-1. Open **Settings → Capabilities → Skills**.
-2. Delete the existing `reeinvent-pitch-deck-design` entry.
-3. Upload the new ZIP.
-4. Quit Claude and reopen it.
+1. Download the latest ZIP from the [GitHub releases page](https://github.com/rebrained-de/Reeinvent-Pitch-Deck-Designer/releases/latest).
+2. Open **Settings → Capabilities → Skills**.
+3. Delete the existing `reeinvent-pitch-deck-design` entry.
+4. Upload the new ZIP.
+5. Quit Claude and reopen it.
 
 ### Update on Claude Code (terminal)
 
