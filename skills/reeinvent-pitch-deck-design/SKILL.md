@@ -1,6 +1,6 @@
 ---
 name: reeinvent-pitch-deck-design
-description: Apply the Reeinvent brand system when building any pitch deck, slide, cover, section divider, service-offer layout, contact slide, success story, or HTML/PPTX/PDF surface meant to ship under the Reeinvent brand. Use whenever the user asks for a Reeinvent presentation, asks "is this on-brand?" about a Reeinvent surface, or invokes a Reeinvent-branded layout.
+description: Apply the Reeinvent brand system when building any pitch deck, slide, cover, section divider, service-offer layout, contact slide, success story, agenda, stat slide, closing slide, or HTML/PPTX/PDF surface meant to ship under the Reeinvent brand. Use whenever the user asks for a Reeinvent presentation, asks to make slides or build a deck for Reeinvent, asks "is this on-brand?" about a Reeinvent surface, or invokes a Reeinvent-branded layout or archetype (A1 cover through A10).
 ---
 
 # Reeinvent Pitch Deck Design
@@ -13,6 +13,18 @@ You are the custodian of the Reeinvent brand system when this skill is active. E
 - The user sends a screenshot of a deck or slide and asks for a review, critique, or fix.
 - The user asks to refactor, polish, or normalize a Reeinvent-branded surface.
 - The user mentions `DESIGN.md`, `CLAUDE.md`, the Reeinvent brand, or a slide archetype (A1 cover, A2 divider, A5 service detail, etc.).
+
+## Step 0: verify the skill's assets are reachable
+
+The brand system is only useful if Claude can actually open the four canonical brand marks and the Roboto fonts. Run this check the first time a session asks for a Reeinvent surface, before generating anything.
+
+1. Read `assets/logo/Gradient-Logo.svg` relative to this SKILL.md. If the read succeeds, the install location is intact.
+2. Decide how the asset folder will reach the **output** (the HTML / PPTX file you will write):
+   - **If the working directory has write access**, copy the asset tree into it so generated decks can reference `assets/logo/...` and `assets/fonts/...` with relative paths. From a shell: `cp -R <skill-dir>/assets ./assets`. If shell access is restricted, write the files individually using the Write tool, preserving the directory structure.
+   - **If the working directory cannot be written to** (Cowork sandbox, read-only env), inline the SVG content directly into the generated HTML (`<svg>...</svg>` instead of `<img src="assets/logo/...">`). PPTX always needs the file on disk; if you cannot place it there, halt and tell the user.
+3. After the copy or inline strategy is chosen, verify it: list the working directory's `assets/logo/` if you copied, or grep for the inline `<svg>` block if you inlined. Do not skip this verification.
+
+If step 1 fails (the asset read errors), the skill is loaded but its files are not on the filesystem - common in Cowork when the skill was uploaded as a manifest without the asset bundle. **Halt** and tell the user in one sentence: *"The Reeinvent skill is registered but its brand assets are not reachable. Re-upload the skill ZIP and confirm `assets/logo/` is included, or run in Claude Code where the skill folder lives at `~/.claude/skills/reeinvent-pitch-deck-design/`."* Do not proceed to render slides. Do not substitute styled text for the logo. Silent fallback to text is a brand violation by rule 2.
 
 ## Before first steps: check for brand-system updates
 
@@ -60,6 +72,10 @@ Each canonical brand mark ships as an SVG (for HTML / web) and a PNG at 2x (for 
 - PDF via HTML print → SVG. PDF via PPTX export → PNG.
 
 Never inline SVG paths, never create new marks, never draw icons in CSS, never use an external icon library, never substitute SVG for PNG or vice versa outside the routing rule.
+
+**Never render the wordmark as text.** When a slide needs the logo, the output must reference the actual asset file (`<img src="assets/logo/Gradient-Logo.svg">` for HTML, `Slide.shapes.add_picture('assets/logo/Gradient-Logo@2x.png', ...)` for PPTX). A styled `<div>Reeinvent</div>`, a Roboto headline reading "Reeinvent", or any letterform you reconstruct in code is a brand violation. If the asset is unreachable, follow Step 0 - halt and tell the user, do not fall back to text.
+
+**Logo and Arrow watermark never overlap.** The Arrow watermark (`Arrow-Up`) sits flush at `top: 0; right: 0;` per DESIGN.md §4. The wordmark logo (`Gradient-Logo` on light surfaces, `White-Logo` on dark) sits at bottom-left or bottom-center per DESIGN.md §5. If your draft places the logo in the top-right quadrant or on top of the watermark, you have selected the wrong asset or the wrong position. Stop and pick the right one. The two marks share no quadrant on any slide.
 
 ### Text
 - No em-dash character (Unicode U+2014) in any text surface.

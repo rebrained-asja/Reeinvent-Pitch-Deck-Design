@@ -5,7 +5,7 @@
   },
   "metadata": {
     "description": "Reeinvent brand system marketplace. One plugin: reeinvent-pitch-deck-design.",
-    "version": "2.4.0"
+    "version": "2.4.1"
   },
   "plugins": [
     {
@@ -13,7 +13,7 @@
       "description": "Reeinvent brand system and design rules for pitch decks, slides, covers, section dividers, service layouts, and any HTML / PPTX / PDF surface that ships under the Reeinvent brand.",
       "source": "./",
       "strict": false,
-      "version": "2.4.0",
+      "version": "2.4.1",
       "skills": [
         "./skills/reeinvent-pitch-deck-design"
       ]

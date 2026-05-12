@@ -6,6 +6,48 @@ The version your install runs is in [VERSION](VERSION). Claude reports it on ses
 
 ---
 
+## v2.4.1 - 2026-05-12
+
+**Cowork install fix + brand-asset safety net.** A first client install of v2.4.0 surfaced three documentation bugs and one silent runtime failure. None of the brand rules change; v2.4.0 decks rebuild bit-identical on v2.4.1.
+
+### Documentation - install paths corrected
+
+The README presented three install paths as if equivalent. Two were wrong for Cowork:
+
+- `/plugin marketplace add ...` does not work in Cowork chat. It is a Claude Code-only slash command. The README now scopes it to Claude Code.
+- "Settings → Code → Plugins" does not exist in Claude Desktop / Cowork. The README's instruction to install there is removed.
+- `~/.claude/skills/` is not read by Cowork. The manual-copy fallback is now labeled Claude-Code-only.
+
+Replaced with a verified Cowork path: download the repo ZIP, extract `skills/reeinvent-pitch-deck-design/` as the skill bundle, re-zip that subfolder, upload via Cowork's Skills panel (claude.ai → Settings → Capabilities → Skills, or the Desktop Skills sidebar). The README now opens with a surface-to-path matrix so the right path is picked before any commands run.
+
+Added a Troubleshooting section covering the five symptoms most likely to surface in a fresh client install: the "unknown skill" error in Cowork chat, the silent `~/.claude/skills/` no-op in Cowork, logo-rendered-as-text, logo-on-top-of-watermark, and the missing cross-project trigger.
+
+### Skill runtime - Step 0 asset verification
+
+Added a "Step 0: verify the skill's assets are reachable" gate at the top of SKILL.md, before the existing version check. It runs the first time a session asks for a Reeinvent surface:
+
+1. Read `assets/logo/Gradient-Logo.svg` to confirm the install location is intact.
+2. Decide an asset-reach strategy for the output (copy `assets/` into the working directory, or inline SVGs for HTML when filesystem access is restricted).
+3. Verify the strategy worked before generating any deck.
+
+If step 1 fails, the skill halts and reports the install problem in one sentence. It does not fall back to text or CSS-drawn marks. This converts the most common failure mode (the v2.4.0 client install hit this when Cowork registered the skill manifest without bundling the assets) from silent to loud.
+
+### Brand rules - logo lockup section
+
+Added three rules (33-35) in CLAUDE.md covering logo behavior that v2.4.0 left implicit and Claude got wrong:
+
+- **Rule 33**: Never render the wordmark as styled text. The wordmark loads from the asset file or the skill halts per Step 0. No `<div>Reeinvent</div>` fallback.
+- **Rule 34**: The logo and the Arrow watermark never share a quadrant. Logo bottom-left / bottom-center; Arrow flush top-right. Overlap means the wrong asset was selected.
+- **Rule 35**: Wordmark routing by surface is not optional - `Gradient-Logo` on light, `White-Logo` on dark or gradient.
+
+The same content lands in SKILL.md's "Assets" section so both ground-truth files agree. Added traps 11-13 (logo-as-text, logo-on-watermark, skipping Step 0) so the failure modes are documented twice - by rule and by anti-pattern.
+
+Pre-flight checklist updated: the `<img src>` line now explicitly forbids text substitutes; new lines verify logo / watermark quadrant separation and light / dark wordmark routing.
+
+### Skill description - broader trigger phrases
+
+SKILL.md description front-matter now includes `agenda`, `stat slide`, `closing slide`, `make slides`, `build a deck`, and `A1 through A10` so the skill fires reliably when users phrase a request without saying "Reeinvent presentation" verbatim. The v2.4.0 description triggered cleanly on the formal phrasing but missed casual ones like "draft me a client pitch deck."
+
 ## v2.4.0 - 2026-05-05
 
 **Vector PDF export for client distribution.** Adds `scripts/render-pdf.py` so HTML decks can render directly to PDF via headless Chrome - SVGs and gradients stay vector all the way to the deliverable. The previous default path (HTML -> PPTX -> LibreOffice PDF) downsampled and JPEG-recompressed every embedded image; logos and gradient bands degraded visibly at any zoom. The new path is the canonical client-distribution flow.

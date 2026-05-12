@@ -199,6 +199,11 @@ If any of these cannot be satisfied for a given layout, **fall back to solid Cor
 ### Content
 32. This project's files contain **no Reeinvent copy**. All demo text is generic placeholder. Do not import taglines, case-study text, or service descriptions from the reference PDFs.
 
+### Logo lockup (DESIGN.md §5)
+33. **Never render the wordmark as text.** When a slide needs the Reeinvent logo, the output must reference the actual asset file: `<img src="assets/logo/Gradient-Logo.svg">` for HTML, `Slide.shapes.add_picture('assets/logo/Gradient-Logo@2x.png', ...)` for PPTX. A styled `<div>Reeinvent</div>`, a Roboto headline reading "Reeinvent", a letterform reconstructed in code, or a CSS gradient applied to type spelling the brand name is a violation. If the asset is unreachable from the working directory, halt per SKILL.md Step 0 and tell the user the skill needs reinstalling; never substitute text.
+34. **The logo and the Arrow watermark never share a quadrant.** The Arrow watermark sits flush at `top: 0; right: 0;` (rule 21). The wordmark logo sits at bottom-left (cover, content slides) or bottom-center (closing slide) per DESIGN.md §5. A logo placed in the top-right corner, or stacked on the Arrow watermark, means you selected the wrong asset or the wrong position - stop and pick the right one.
+35. **Light vs. dark wordmark routing is not optional.** On a light surface (Off-White, white card, white strip) use `Gradient-Logo`. On a dark or gradient surface (Ink, Deep Navy, Signature Gradient) use `White-Logo`. Never use the gradient wordmark on a gradient background - the colors collide. Never use the white wordmark on a light background - it disappears.
+
 ## Traps you will fall into if you aren't careful
 
 Claude makes these mistakes by default. Pre-empt them.
@@ -213,6 +218,9 @@ Claude makes these mistakes by default. Pre-empt them.
 8. **Pulling copy from reference decks.** The reference PDFs are for layout only. Never extract taglines, headlines, or body text.
 9. **Creating documentation or asset files.** No new `*.md` or `*.svg` files unless the user explicitly asks.
 10. **Inventing a component.** New components must be proposed to the user, added to DESIGN.md §7, and only then used in demos.
+11. **Rendering the wordmark as styled text instead of loading the asset.** When the working directory doesn't have `assets/logo/Gradient-Logo.svg` reachable, the reflex is to "render the brand" by writing `<div style="font-weight: 700; background: gradient...">Reeinvent</div>`. That is a brand violation per rule 33. The correct response is to halt, run SKILL.md Step 0, and report the install problem - or copy the asset folder into the working directory if you can. Never produce a deck whose "logo" is a CSS-styled string.
+12. **Placing the logo on top of the Arrow watermark.** Both files live in `assets/logo/` and both are called "marks" in the docs, but they have different jobs and different positions per rule 34. The Arrow is top-right; the wordmark is bottom-left or bottom-center. If your layout puts them in the same quadrant, you picked the wrong asset.
+13. **Skipping Step 0 because the skill loaded.** A successful skill registration does not mean the asset files are on the filesystem - especially in Cowork, which can register a skill manifest without bundling the assets. Always verify the asset read before producing a deck, every session.
 
 ## How to handle common requests
 
@@ -309,7 +317,9 @@ Use this against every demo edit, every new slide, every component addition:
 - [ ] Every gradient is `30deg`.
 - [ ] The Arrow is 0°/90°/180°/270° rotation - not flipped.
 - [ ] No inline SVG paths, no data-URI SVGs, no CSS-drawn icons anywhere in the file.
-- [ ] Every `<img src>` points to one of the three files in `assets/logo/`.
+- [ ] Every `<img src>` points to one of the four files in `assets/logo/`. The wordmark is loaded from the asset file, never written as styled text or a `<div>` spelling "Reeinvent".
+- [ ] The Reeinvent wordmark and the Arrow watermark sit in different quadrants - wordmark bottom-left or bottom-center, Arrow flush top-right. They never overlap.
+- [ ] Wordmark routing matches surface: `Gradient-Logo` on light, `White-Logo` on dark or gradient. Never the gradient wordmark on a gradient background.
 - [ ] Arrow watermarks sit flush at `top: 0; right: 0;` - fully visible, never cropped, never bleeding off the canvas.
 - [ ] Font family is Roboto with weights only from {300, 400, 500, 700, 900}, plus 400 italic for pull quotes.
 - [ ] No `#000000` or `#FFFFFF` as a section/slide background.
