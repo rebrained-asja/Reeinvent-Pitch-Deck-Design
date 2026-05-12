@@ -61,19 +61,19 @@ Always at **30 degrees**. Never 45, 135, or any cardinal direction. Three canoni
 
 Each canonical brand mark ships as an SVG (for HTML / web) and a PNG at 2x (for PPTX / Slides embedding).
 
-- `assets/logo/Arrow-Up.svg` / `Arrow-Up@2x.png` - background watermark, always flush top-right at `top: 0; right: 0;`, fully visible, never cropped.
-- `assets/logo/Upwards-Arrow.svg` / `Upwards-Arrow@2x.png` - bullet marker for lists, always used, never substituted.
-- `assets/logo/White-Logo.svg` / `White-Logo@2x.png` - white wordmark, use on dark or gradient surfaces.
-- `assets/logo/Gradient-Logo.svg` / `Gradient-Logo@2x.png` - gradient wordmark, use on light surfaces.
+- `assets/logo/Arrow-Up.svg` / `Arrow-Up-2x.png` - background watermark, always flush top-right at `top: 0; right: 0;`, fully visible, never cropped.
+- `assets/logo/Upwards-Arrow.svg` / `Upwards-Arrow-2x.png` - bullet marker for lists, always used, never substituted.
+- `assets/logo/White-Logo.svg` / `White-Logo-2x.png` - white wordmark, use on dark or gradient surfaces.
+- `assets/logo/Gradient-Logo.svg` / `Gradient-Logo-2x.png` - gradient wordmark, use on light surfaces.
 
 **Routing by output format:**
 - HTML / web surfaces → use the `.svg` file.
-- PPTX / Google Slides → use the `@2x.png` file, inserted via `Slide.shapes.add_picture()`. PPTX renders SVG imports unreliably.
+- PPTX / Google Slides → use the `-2x.png` file, inserted via `Slide.shapes.add_picture()`. PPTX renders SVG imports unreliably.
 - PDF via HTML print → SVG. PDF via PPTX export → PNG.
 
 Never inline SVG paths, never create new marks, never draw icons in CSS, never use an external icon library, never substitute SVG for PNG or vice versa outside the routing rule.
 
-**Never render the wordmark as text.** When a slide needs the logo, the output must reference the actual asset file (`<img src="assets/logo/Gradient-Logo.svg">` for HTML, `Slide.shapes.add_picture('assets/logo/Gradient-Logo@2x.png', ...)` for PPTX). A styled `<div>Reeinvent</div>`, a Roboto headline reading "Reeinvent", or any letterform you reconstruct in code is a brand violation. If the asset is unreachable, follow Step 0 - halt and tell the user, do not fall back to text.
+**Never render the wordmark as text.** When a slide needs the logo, the output must reference the actual asset file (`<img src="assets/logo/Gradient-Logo.svg">` for HTML, `Slide.shapes.add_picture('assets/logo/Gradient-Logo-2x.png', ...)` for PPTX). A styled `<div>Reeinvent</div>`, a Roboto headline reading "Reeinvent", or any letterform you reconstruct in code is a brand violation. If the asset is unreachable, follow Step 0 - halt and tell the user, do not fall back to text.
 
 **Logo and Arrow watermark never overlap.** The Arrow watermark (`Arrow-Up`) sits flush at `top: 0; right: 0;` per DESIGN.md §4. The wordmark logo (`Gradient-Logo` on light surfaces, `White-Logo` on dark) sits at bottom-left or bottom-center per DESIGN.md §5. If your draft places the logo in the top-right quadrant or on top of the watermark, you have selected the wrong asset or the wrong position. Stop and pick the right one. The two marks share no quadrant on any slide.
 
@@ -119,7 +119,7 @@ Run through the checklist in `CLAUDE.md` before finishing any substantive edit. 
 - Text under 40pt on dark surfaces is white, not gradient.
 - Gradient stripes match text width.
 - Button content is center-aligned.
-- Bullet lists use `Upwards-Arrow.svg` (HTML) or `Upwards-Arrow@2x.png` (PPTX), and each item fits on one line.
+- Bullet lists use `Upwards-Arrow.svg` (HTML) or `Upwards-Arrow-2x.png` (PPTX), and each item fits on one line.
 - Sparse slides anchor content to the bottom.
 - Every `background-clip: text` element satisfies the safety contract.
 - Zero em-dash characters (U+2014) in the file.

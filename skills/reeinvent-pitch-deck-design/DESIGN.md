@@ -193,8 +193,8 @@ Opacity stays within:
 
 Only **two wordmark variants** exist. There is no lettermark, no app-icon mark, no monogram.
 
-- **Gradient Wordmark** - `assets/logo/Gradient-Logo.svg` (HTML) / `assets/logo/Gradient-Logo@2x.png` (PPTX). Carries the Signature Gradient (30°, `#2665E2 → #C26DE6`). The default mark on all light surfaces (Off-White, white cards, white strips).
-- **White Wordmark** - `assets/logo/White-Logo.svg` (HTML) / `assets/logo/White-Logo@2x.png` (PPTX). Solid `#ffffff`. The default mark on all dark / gradient surfaces (Ink, Deep Navy, Signature-Gradient backgrounds).
+- **Gradient Wordmark** - `assets/logo/Gradient-Logo.svg` (HTML) / `assets/logo/Gradient-Logo-2x.png` (PPTX). Carries the Signature Gradient (30°, `#2665E2 → #C26DE6`). The default mark on all light surfaces (Off-White, white cards, white strips).
+- **White Wordmark** - `assets/logo/White-Logo.svg` (HTML) / `assets/logo/White-Logo-2x.png` (PPTX). Solid `#ffffff`. The default mark on all dark / gradient surfaces (Ink, Deep Navy, Signature-Gradient backgrounds).
 
 ### Placement on slides
 - **Cover slide (Signature Gradient bg)**: White Wordmark, centered horizontally, anchored at vertical center (slight optical lift of −0.3 in). Height ~0.9 in.
@@ -328,7 +328,7 @@ There is **no SVG button library**. When a CTA is required, build it from brand 
 
 Bulleted lists use a single canonical marker and obey a strict set of rules. Sloppy bullets - wrapped text, inconsistent cadence, substitute markers - are a brand violation.
 
-**Marker**: always `assets/logo/Upwards-Arrow.svg` (HTML) / `assets/logo/Upwards-Arrow@2x.png` (PPTX). A Core Blue rounded square containing the up-right arrow. No dots, no dashes, no checkmarks, no CSS-drawn rounded-squares, no pseudo-elements.
+**Marker**: always `assets/logo/Upwards-Arrow.svg` (HTML) / `assets/logo/Upwards-Arrow-2x.png` (PPTX). A Core Blue rounded square containing the up-right arrow. No dots, no dashes, no checkmarks, no CSS-drawn rounded-squares, no pseudo-elements.
 
 **Size**: marker height ≈ **1.6 × the label's cap-height** (so the bullet reads a hair larger than the text and visually anchors the row).
 
@@ -496,7 +496,7 @@ Every PPTX deck Claude generates must be **fully editable by the presenter in Po
 
 1. **Live editable text.** Every text element is a native PowerPoint text frame (`TextFrame` in python-pptx). Never rasterized, never converted to shapes or paths, never embedded as an image.
 2. **Native shapes.** Cards, pills, cover backgrounds, gradient fills, stripe accents, underlines, callout bubbles are PowerPoint shape objects (`Slide.shapes.add_shape()`, `.add_textbox()`, etc.), not flattened images.
-3. **Brand assets as picture objects - PNG, not SVG.** The four canonical brand marks go in via `Slide.shapes.add_picture()` using the `@2x.png` variant from `assets/logo/`, never the SVG. PPTX and Google Slides render SVG imports unreliably (gradient collapse, placeholder rectangles, missing fills); PNG is universally reliable. The presenter can still reposition or resize the picture object. Alt text is always set (`picture.alt_text = "Reeinvent arrow"` etc.) for accessibility and Selection Pane navigation. See §14 for the routing rule.
+3. **Brand assets as picture objects - PNG, not SVG.** The four canonical brand marks go in via `Slide.shapes.add_picture()` using the `-2x.png` variant from `assets/logo/`, never the SVG. PPTX and Google Slides render SVG imports unreliably (gradient collapse, placeholder rectangles, missing fills); PNG is universally reliable. The presenter can still reposition or resize the picture object. Alt text is always set (`picture.alt_text = "Reeinvent arrow"` etc.) for accessibility and Selection Pane navigation. See §14 for the routing rule.
 4. **Theme Colors defined.** The 9 canonical hex codes are registered as PPTX Theme Colors in the `theme1.xml` of the .pptx package. Shape fills reference Theme Color slots (for example `MSO_THEME_COLOR.ACCENT_1` mapped to Core Blue) rather than hard-coding RGB on every shape. This lets a global palette change propagate.
 5. **Theme Font set to Roboto** with Arial as fallback. Set via the theme's Major Font + Minor Font definitions.
 6. **Slide Master + Layouts per archetype.** The Slide Master defines the wordmark stamp, footer page number, and default typography. One Slide Layout exists per production archetype (cover, section divider, service detail, stat, contact, closing, agenda, etc. per `reference.md`). When the presenter adds a new slide from the "New Slide" menu, each layout is available as a brand-correct starting point.
@@ -542,7 +542,7 @@ When asking an AI agent to generate a slide, include:
 **Canvas**: `16:9, 13.333 in × 7.5 in, Off-White background (#F5F5F5)`
 **Fonts**: `Roboto 700 for title, Roboto 400 for body`
 **Palette**: `Ink #0A1220, Core Blue #2665E2, Mid Violet #C26DE6, 30° gradient`
-**Arrow**: `use Arrow-Up mark (SVG for HTML, @2x.png for PPTX) at [size] in, fill [color], rotation [deg]`
+**Arrow**: `use Arrow-Up mark (SVG for HTML, -2x.png for PPTX) at [size] in, fill [color], rotation [deg]`
 **Logo**: `Gradient Wordmark at 0.3 in height, bottom-left (0.5, 7.15 in)`
 **Margins**: `content starts 0.6 in from left/top, safe area 0.5 in`
 
@@ -571,16 +571,16 @@ The project ships **four brand marks** - each provided as an SVG (for HTML / web
 
 | Mark | SVG (HTML) | PNG (PPTX) | Canonical use |
 |------|------------|------------|---------------|
-| The Arrow | `assets/logo/Arrow-Up.svg` | `assets/logo/Arrow-Up@2x.png` | The signature mark - background watermarks only. Section-divider decoration, cover / closing watermark. Square, native fill `#F5F5F5`. |
-| Gradient Wordmark | `assets/logo/Gradient-Logo.svg` | `assets/logo/Gradient-Logo@2x.png` | The logo on all **light** surfaces. Carries the Signature Gradient. |
-| White Wordmark | `assets/logo/White-Logo.svg` | `assets/logo/White-Logo@2x.png` | The logo on all **dark / gradient** surfaces. Solid `#ffffff`. |
-| Bullet / Direction Mark | `assets/logo/Upwards-Arrow.svg` | `assets/logo/Upwards-Arrow@2x.png` | The bullet-list marker - **bullets only**. A Core Blue rounded square with a white up-right arrow inside. 56 × 56 native viewBox. Never used as a watermark, decoration, or link button. |
+| The Arrow | `assets/logo/Arrow-Up.svg` | `assets/logo/Arrow-Up-2x.png` | The signature mark - background watermarks only. Section-divider decoration, cover / closing watermark. Square, native fill `#F5F5F5`. |
+| Gradient Wordmark | `assets/logo/Gradient-Logo.svg` | `assets/logo/Gradient-Logo-2x.png` | The logo on all **light** surfaces. Carries the Signature Gradient. |
+| White Wordmark | `assets/logo/White-Logo.svg` | `assets/logo/White-Logo-2x.png` | The logo on all **dark / gradient** surfaces. Solid `#ffffff`. |
+| Bullet / Direction Mark | `assets/logo/Upwards-Arrow.svg` | `assets/logo/Upwards-Arrow-2x.png` | The bullet-list marker - **bullets only**. A Core Blue rounded square with a white up-right arrow inside. 56 × 56 native viewBox. Never used as a watermark, decoration, or link button. |
 
 **Asset routing by output format (strict):**
 - **HTML / web surfaces** → use the `.svg` file. Browsers render SVG natively at any size.
-- **PPTX / Google Slides** → use the `@2x.png` file, embedded via `Slide.shapes.add_picture()`. SVG import is unreliable across PowerPoint versions and Slides imports (gradients collapse to placeholder rectangles, fills drop). PNG at 2x renders identically to the vector at every realistic slide size.
+- **PPTX / Google Slides** → use the `-2x.png` file, embedded via `Slide.shapes.add_picture()`. SVG import is unreliable across PowerPoint versions and Slides imports (gradients collapse to placeholder rectangles, fills drop). PNG at 2x renders identically to the vector at every realistic slide size.
 - **PDF via HTML print** → use the `.svg` file (browser handles rasterization at print time).
-- **PDF via PPTX export** → use the `@2x.png` file (PPTX is the source).
+- **PDF via PPTX export** → use the `-2x.png` file (PPTX is the source).
 
 Do not substitute one for the other outside this routing. Do not re-render PNGs from SVGs on the fly at runtime - the committed PNGs are the only PPTX source of truth.
 

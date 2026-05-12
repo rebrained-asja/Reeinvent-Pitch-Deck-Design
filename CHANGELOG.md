@@ -6,6 +6,24 @@ The version your install runs is in [VERSION](VERSION). Claude reports it on ses
 
 ---
 
+## v2.4.2 - 2026-05-12
+
+**Cowork skill upload fix.** Cowork's Skills uploader rejects ZIPs whose
+contained paths include the `@` character, with the error "Zip file
+contains path with invalid characters." The brand PNGs shipped at
+`Arrow-Up@2x.png`, `Upwards-Arrow@2x.png`, `White-Logo@2x.png`, and
+`Gradient-Logo@2x.png` (the `@2x` is an iOS/web naming convention for
+2x-resolution assets). Renamed all four files to `-2x.png` so the ZIP
+uploads cleanly. Updated every reference in SKILL.md, CLAUDE.md,
+DESIGN.md, and the CI workflow.
+
+**No brand-rule changes.** The PNGs are bit-identical; only the filenames
+changed. Decks built on v2.4.1 rebuild bit-identical on v2.4.2 once the
+filename references update.
+
+If you used the old `@2x.png` filenames in your own documents or
+templates, do a find-and-replace: `@2x.png` -> `-2x.png`.
+
 ## v2.4.1 - 2026-05-12
 
 **Cowork install fix + brand-asset safety net.** A first client install of v2.4.0 surfaced three documentation bugs and one silent runtime failure. None of the brand rules change; v2.4.0 decks rebuild bit-identical on v2.4.1.

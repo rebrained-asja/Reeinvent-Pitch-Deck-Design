@@ -56,13 +56,13 @@ skills/reeinvent-pitch-deck-design/
 └── assets/
     ├── logo/                 ← the four canonical brand marks - SVG + PNG pairs
     │   ├── Arrow-Up.svg            ← background watermark arrow (native fill #F5F5F5)
-    │   ├── Arrow-Up@2x.png         ← PNG for PPTX embedding
+    │   ├── Arrow-Up-2x.png         ← PNG for PPTX embedding
     │   ├── Upwards-Arrow.svg       ← BULLET marker - Core Blue rounded square + white arrow
-    │   ├── Upwards-Arrow@2x.png    ← PNG for PPTX embedding
+    │   ├── Upwards-Arrow-2x.png    ← PNG for PPTX embedding
     │   ├── White-Logo.svg          ← WHITE wordmark (fill: #fff) for dark / gradient surfaces
-    │   ├── White-Logo@2x.png       ← PNG for PPTX embedding
+    │   ├── White-Logo-2x.png       ← PNG for PPTX embedding
     │   ├── Gradient-Logo.svg       ← GRADIENT wordmark (#2665E2 → #C26DE6) for light surfaces
-    │   └── Gradient-Logo@2x.png    ← PNG for PPTX embedding
+    │   └── Gradient-Logo-2x.png    ← PNG for PPTX embedding
     └── fonts/
         └── Roboto/            ← Apache 2.0, shipped for PPTX font embedding
             ├── Roboto-Light.ttf     ← weight 300
@@ -80,9 +80,9 @@ inside skills/reeinvent-pitch-deck-design/.
 
 **Asset routing by output format:**
 - **HTML / web surfaces** → use the `.svg` file. Browsers render SVG natively at any size.
-- **PPTX / Google Slides** → use the `@2x.png` file. PPTX and Slides render SVG imports unreliably (missing fills, placeholder rectangles, gradient collapse). PNG embedded via `add_picture()` is universally reliable.
+- **PPTX / Google Slides** → use the `-2x.png` file. PPTX and Slides render SVG imports unreliably (missing fills, placeholder rectangles, gradient collapse). PNG embedded via `add_picture()` is universally reliable.
 - **PDF via HTML print** → use the `.svg` file. Run `scripts/render-pdf.py` so SVGs stay vector all the way to PDF. Browser print works too if the HTML has `@page` and `@media print` rules.
-- **PDF via PPTX export** → use the `@2x.png` file (PPTX is the source). Avoid for client-distributed PDFs because LibreOffice / PowerPoint downsample and JPEG-recompress the embedded PNGs.
+- **PDF via PPTX export** → use the `-2x.png` file (PPTX is the source). Avoid for client-distributed PDFs because LibreOffice / PowerPoint downsample and JPEG-recompress the embedded PNGs.
 
 **The two arrows are not interchangeable.** `Arrow-Up` is the background watermark (used at top-right of cover / divider / closing slides). `Upwards-Arrow` is the bullet marker (used only inside list items). Each has one job.
 
@@ -125,7 +125,7 @@ If you find yourself typing a hex code that is not on this list, stop. There is 
 
 ## The Arrow
 
-- Asset: `assets/logo/Arrow-Up.svg` (HTML) / `assets/logo/Arrow-Up@2x.png` (PPTX)
+- Asset: `assets/logo/Arrow-Up.svg` (HTML) / `assets/logo/Arrow-Up-2x.png` (PPTX)
 - ViewBox: `0 0 47.27 46.43` (treat as square)
 - Native fill: `#F5F5F5`
 - Rotations allowed: **0°, 90°, 180°, 270° only**
@@ -185,7 +185,7 @@ Every gradient-text element in HTML/web/interactive-PDF surfaces MUST satisfy AL
 If any of these cannot be satisfied for a given layout, **fall back to solid Core Blue `#2665E2`** instead of gradient text. Solid color has zero rendering risk.
 
 ### Bullet lists (DESIGN.md §7)
-26. **Bullet marker is always `assets/logo/Upwards-Arrow.svg` (HTML) or `assets/logo/Upwards-Arrow@2x.png` (PPTX).** No dots, dashes, checkmarks, CSS-drawn rounded-squares, or pseudo-elements. One marker, period.
+26. **Bullet marker is always `assets/logo/Upwards-Arrow.svg` (HTML) or `assets/logo/Upwards-Arrow-2x.png` (PPTX).** No dots, dashes, checkmarks, CSS-drawn rounded-squares, or pseudo-elements. One marker, period.
 27. **One line per bullet item - always.** No wrapping to two lines, ever. Enforce with `white-space: nowrap`. If an item doesn't fit, rewrite it tighter or split into two bullets.
 28. **Copy in bullets is scan-ready, not sentence-form.** Short noun phrases or verb phrases. Tight. Every item in one list shares the same grammatical shape.
 29. **Max 6 items per bullet list.** Past six, the reader skips. Split into two lists or switch layout.
@@ -200,7 +200,7 @@ If any of these cannot be satisfied for a given layout, **fall back to solid Cor
 32. This project's files contain **no Reeinvent copy**. All demo text is generic placeholder. Do not import taglines, case-study text, or service descriptions from the reference PDFs.
 
 ### Logo lockup (DESIGN.md §5)
-33. **Never render the wordmark as text.** When a slide needs the Reeinvent logo, the output must reference the actual asset file: `<img src="assets/logo/Gradient-Logo.svg">` for HTML, `Slide.shapes.add_picture('assets/logo/Gradient-Logo@2x.png', ...)` for PPTX. A styled `<div>Reeinvent</div>`, a Roboto headline reading "Reeinvent", a letterform reconstructed in code, or a CSS gradient applied to type spelling the brand name is a violation. If the asset is unreachable from the working directory, halt per SKILL.md Step 0 and tell the user the skill needs reinstalling; never substitute text.
+33. **Never render the wordmark as text.** When a slide needs the Reeinvent logo, the output must reference the actual asset file: `<img src="assets/logo/Gradient-Logo.svg">` for HTML, `Slide.shapes.add_picture('assets/logo/Gradient-Logo-2x.png', ...)` for PPTX. A styled `<div>Reeinvent</div>`, a Roboto headline reading "Reeinvent", a letterform reconstructed in code, or a CSS gradient applied to type spelling the brand name is a violation. If the asset is unreachable from the working directory, halt per SKILL.md Step 0 and tell the user the skill needs reinstalling; never substitute text.
 34. **The logo and the Arrow watermark never share a quadrant.** The Arrow watermark sits flush at `top: 0; right: 0;` (rule 21). The wordmark logo sits at bottom-left (cover, content slides) or bottom-center (closing slide) per DESIGN.md §5. A logo placed in the top-right corner, or stacked on the Arrow watermark, means you selected the wrong asset or the wrong position - stop and pick the right one.
 35. **Light vs. dark wordmark routing is not optional.** On a light surface (Off-White, white card, white strip) use `Gradient-Logo`. On a dark or gradient surface (Ink, Deep Navy, Signature Gradient) use `White-Logo`. Never use the gradient wordmark on a gradient background - the colors collide. Never use the white wordmark on a light background - it disappears.
 
@@ -329,8 +329,8 @@ Use this against every demo edit, every new slide, every component addition:
 - [ ] **Text under 40 pt on dark surfaces is White, never gradient, never solid blue.**
 - [ ] **Gradient stripes under eyebrows match the text width exactly** - not fixed-width.
 - [ ] **Button content is center-aligned horizontally.**
-- [ ] **Bullet lists use `Upwards-Arrow.svg` (HTML) or `Upwards-Arrow@2x.png` (PPTX) as the marker** - no substitutes.
-- [ ] **PPTX embeds PNG (`@2x.png`) brand assets, never SVG.** HTML surfaces use SVG.
+- [ ] **Bullet lists use `Upwards-Arrow.svg` (HTML) or `Upwards-Arrow-2x.png` (PPTX) as the marker** - no substitutes.
+- [ ] **PPTX embeds PNG (`-2x.png`) brand assets, never SVG.** HTML surfaces use SVG.
 - [ ] **Every generated `.pptx` has been run through `python scripts/embed-fonts.py`** and contains six `ppt/fonts/*.fntdata` entries (verify with `unzip -l FILE.pptx | grep fntdata`). No embedded fonts means the deck falls back to Arial on client machines - a brand violation.
 - [ ] **PPTX text frames inside fixed-geometry cards use `normAutofit`, not `spAutoFit`.** Card boundaries hold; text shrinks if it overflows. Verify with `unzip -p FILE.pptx 'ppt/slides/*.xml' | grep -c spAutoFit` returning 0 for card text frames.
 - [ ] **PPTX stat numbers and headline-scale text (≥ 40 pt) carry Signature Gradient text fill, not solid Core Blue.** Per DESIGN.md §3 + §6.5 + §12.1 rule 12.

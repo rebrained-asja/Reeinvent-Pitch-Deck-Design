@@ -95,16 +95,18 @@ jobs:
           test "$fail" = "0"
           echo "OK: every SVG hex is on the 9-color palette"
 
-      - name: Version sync (VERSION == plugin.json == marketplace.json)
+      - name: Version sync (VERSION == skill VERSION == plugin.json == marketplace.json)
         shell: bash
         run: |
           set -e
-          v_file=$(tr -d '[:space:]' < VERSION)
+          v_root=$(tr -d '[:space:]' < VERSION)
+          v_skill=$(tr -d '[:space:]' < skills/reeinvent-pitch-deck-design/VERSION)
           v_plugin=$(python -c "import json; print(json.load(open('.claude-plugin/plugin.json'))['version'])")
           v_market=$(python -c "import json; print(json.load(open('.claude-plugin/marketplace.json'))['plugins'][0]['version'])")
-          echo "VERSION=$v_file plugin.json=$v_plugin marketplace.json=$v_market"
-          test "$v_file" = "$v_plugin"
-          test "$v_file" = "$v_market"
+          echo "root=$v_root skill=$v_skill plugin.json=$v_plugin marketplace.json=$v_market"
+          test "$v_root" = "$v_skill"
+          test "$v_root" = "$v_plugin"
+          test "$v_root" = "$v_market"
           echo "OK: versions are in sync"
 
       - name: Required brand assets present
@@ -113,10 +115,10 @@ jobs:
           set -e
           base=skills/reeinvent-pitch-deck-design/assets
           required=(
-            "$base/logo/Arrow-Up.svg"          "$base/logo/Arrow-Up@2x.png"
-            "$base/logo/Upwards-Arrow.svg"     "$base/logo/Upwards-Arrow@2x.png"
-            "$base/logo/White-Logo.svg"        "$base/logo/White-Logo@2x.png"
-            "$base/logo/Gradient-Logo.svg"     "$base/logo/Gradient-Logo@2x.png"
+            "$base/logo/Arrow-Up.svg"          "$base/logo/Arrow-Up-2x.png"
+            "$base/logo/Upwards-Arrow.svg"     "$base/logo/Upwards-Arrow-2x.png"
+            "$base/logo/White-Logo.svg"        "$base/logo/White-Logo-2x.png"
+            "$base/logo/Gradient-Logo.svg"     "$base/logo/Gradient-Logo-2x.png"
             "$base/fonts/Roboto/Roboto-Light.ttf"
             "$base/fonts/Roboto/Roboto-Regular.ttf"
             "$base/fonts/Roboto/Roboto-Italic.ttf"
