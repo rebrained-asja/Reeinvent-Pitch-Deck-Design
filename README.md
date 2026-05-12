@@ -24,20 +24,47 @@ Without them, Claude can still build slides on screen (as web pages) and follow 
 
 ## Install
 
-1. Get the ZIP from your Rebrained contact (e.g. `reeinvent-pitch-deck-design-2.4.1.zip`).
-2. Open Claude. Go to **Settings → Capabilities → Skills**.
-3. Click **Create skill** and upload the ZIP.
-4. Quit Claude and reopen it once.
+Pick the version of Claude you use. You only need to install once.
 
-Done. The brand rules now apply in every chat, in any project. You only do this once.
+### Install for Cowork
+
+1. Get the ZIP from your Rebrained contact (e.g. `reeinvent-pitch-deck-design-2.4.1.zip`).
+2. Open Cowork. Go to **Settings → Capabilities → Skills**.
+3. Click **Create skill** and upload the ZIP.
+4. Quit Cowork and reopen it once.
+
+Done.
+
+### Install for Claude Desktop
+
+1. Get the ZIP from your Rebrained contact (e.g. `reeinvent-pitch-deck-design-2.4.1.zip`).
+2. Open the Claude Desktop app. Go to **Settings → Capabilities → Skills**.
+3. Click **Create skill** and upload the ZIP.
+4. Quit the app (Cmd-Q on Mac, right-click → Exit on Windows) and reopen it.
+
+Done.
+
+### Install for Claude Code (terminal)
+
+In your terminal, paste these two lines, one at a time:
+
+```
+/plugin marketplace add rebrained-de/Reeinvent-Pitch-Deck-Designer
+```
+
+```
+/plugin install reeinvent-pitch-deck-design@reeinvent-brand-system
+```
+
+Done. No ZIP needed - Claude Code pulls everything directly from our GitHub.
 
 ### Check it worked
 
-Open any chat and ask:
+In any chat (Cowork, Desktop, or Claude Code), ask:
 
 > "What brand system is active, and what version?"
 
-Claude should reply `reeinvent-pitch-deck-design` and the version that matches your ZIP. If it doesn't, delete the entry in Skills and re-upload the ZIP.
+Claude should reply `reeinvent-pitch-deck-design` and a version number. If it doesn't, repeat the install steps for your version of Claude.
 
 ---
 
@@ -65,14 +92,28 @@ Claude knows the full brand system automatically: the 9 Reeinvent colors, the 30
 
 ## Updating to a new version
 
-When Rebrained releases an update, you'll get a new ZIP file (e.g. `reeinvent-pitch-deck-design-2.5.0.zip`).
+When Rebrained releases an update, here's how to refresh your install.
 
-1. Open Claude → **Settings → Capabilities → Skills**.
+### Update on Cowork or Claude Desktop
+
+You'll get a new ZIP file (e.g. `reeinvent-pitch-deck-design-2.5.0.zip`).
+
+1. Open **Settings → Capabilities → Skills**.
 2. Delete the existing `reeinvent-pitch-deck-design` entry.
 3. Upload the new ZIP.
 4. Quit Claude and reopen it.
 
-Two clicks plus a restart. Your conversations and projects are untouched.
+### Update on Claude Code (terminal)
+
+In your terminal, paste:
+
+```
+/plugin update reeinvent-pitch-deck-design@reeinvent-brand-system
+```
+
+That's it. No ZIP, no restart needed.
+
+Your conversations and projects are untouched by an update.
 
 ---
 
@@ -127,24 +168,9 @@ You don't need to touch any of this. It's listed in case you're ever curious wha
 
 ---
 
-## For developers (Rebrained internal)
+## Offline / restricted environments (Rebrained internal)
 
-If you're on the Rebrained team using Claude Code (the terminal tool), there's a faster install path that doesn't need a ZIP.
-
-In your terminal:
-
-```
-/plugin marketplace add rebrained-de/Reeinvent-Pitch-Deck-Designer
-/plugin install reeinvent-pitch-deck-design@reeinvent-brand-system
-```
-
-To update later:
-
-```
-/plugin update reeinvent-pitch-deck-design@reeinvent-brand-system
-```
-
-If the marketplace isn't available (offline, restricted env), clone the repo and copy the skill folder into `~/.claude/skills/`:
+If the Claude Code plugin marketplace isn't reachable (offline, restricted network), clone the repo and copy the skill folder into your Claude Code skills directory:
 
 ```bash
 git clone https://github.com/rebrained-de/Reeinvent-Pitch-Deck-Designer.git ~/Documents/Reeinvent-Brand
@@ -152,7 +178,7 @@ mkdir -p ~/.claude/skills
 cp -R ~/Documents/Reeinvent-Brand/skills/reeinvent-pitch-deck-design ~/.claude/skills/
 ```
 
-These paths are **Claude Code only**. They don't work in Cowork or Claude Desktop. Those use the Skills upload path described above.
+This fallback is **Claude Code only**. Cowork and Claude Desktop use the Skills upload path described above.
 
 ---
 
